@@ -1,4 +1,6 @@
 package com.ayush.proms.model;
+import com.ayush.proms.enums.ProjectStatus;
+import com.ayush.proms.utils.AuditAbstract;
 import lombok.*;
 
 import javax.persistence.*;
@@ -11,7 +13,7 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Project {
+public class Project extends AuditAbstract {
     @Id
     @SequenceGenerator(name = "project_sequence",allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "project_sequence")
@@ -35,4 +37,7 @@ public class Project {
     @OneToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_supervisor"),name = "supervisor_id")
     private User supervisor;
+
+    @Enumerated(value = EnumType.STRING)
+    private ProjectStatus projectStatus;
 }
