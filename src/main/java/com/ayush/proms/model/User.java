@@ -3,6 +3,7 @@ package com.ayush.proms.model;
 import com.ayush.proms.enums.Faculty;
 import com.ayush.proms.enums.Semester;
 import com.ayush.proms.utils.AuditAbstract;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import java.util.*;
 
@@ -30,11 +31,8 @@ public class User extends AuditAbstract {
     @Enumerated(value = EnumType.STRING)
     private Semester semester;
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            joinColumns = {@JoinColumn(name = "project_id")},
-            inverseJoinColumns = {@JoinColumn(name = "user_id")}
-    )
-    private Set<Project> projects=new HashSet<>();
+    @ManyToMany(mappedBy = "students")
+    @JsonIgnore
+    private List<Project> projectList;
 
 }

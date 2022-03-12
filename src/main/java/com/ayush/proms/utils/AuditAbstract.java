@@ -16,7 +16,6 @@ import java.util.Date;
 
 @Getter
 @Setter
-@Entity
 @EntityListeners(AuditingEntityListener.class)
 public class AuditAbstract {
     @CreatedBy
