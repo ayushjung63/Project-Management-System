@@ -15,6 +15,8 @@ public interface ProjectService {
 
     Integer rejectProject(Long projectId);
 
+    Long assignSupervisor(Long projectId, Long supervisorId);
+
     Project getById(Long projectId);
 
 }

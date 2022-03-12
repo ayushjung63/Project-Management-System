@@ -31,8 +31,13 @@ public class Project extends AuditAbstract {
     @Temporal(TemporalType.DATE)
     private Date end_date;
 
-    @ManyToMany(mappedBy = "projects")
-    private Set<User> students=new HashSet<>();
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "project_users",
+            joinColumns = {@JoinColumn(name = "project_id")},
+            inverseJoinColumns = {@JoinColumn(name = "user_id")}
+    )
+    private List<User> students=new ArrayList<>();
 
     @OneToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_supervisor"),name = "supervisor_id")

@@ -59,4 +59,14 @@ public class ProjectController extends BaseController {
         }
     }
 
+    @GetMapping (value = "/{projectId}/assign-supervisor/{supervisorId}")
+    public ResponseEntity assignSupervisor(@PathVariable("projectId") Long projectId,@PathVariable("supervisorId") Long supervisorId){
+        Long data = projectService.assignSupervisor(projectId,supervisorId);
+        if (data>=1){
+            return new ResponseEntity(successResponse("Project Supervisor Assigned Successfully",data),HttpStatus.OK);
+        }else {
+            return new ResponseEntity(errorResponse("Failed to assign supervisor",data),HttpStatus.OK);
+        }
+    }
+
 }
