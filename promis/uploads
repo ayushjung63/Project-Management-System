@@ -1,0 +1,23 @@
+{
+  "name":"Ayush Basnet",
+  "faculty":"BCA",
+  "semester":"SIXTH",
+  "subjects":[
+        {
+          "name":"DSA",
+          "marks":50
+        },
+        {
+          "name":"Java",
+          "marks":60
+        },
+        {
+          "name":"PHP",
+          "marks":55
+        },
+        {
+          "name":"Dot Net",
+          "marks":60
+        }
+    ]
+}

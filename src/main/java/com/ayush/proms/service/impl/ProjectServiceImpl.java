@@ -6,6 +6,7 @@ import com.ayush.proms.model.User;
 import com.ayush.proms.pojos.ProjectPOJO;
 import com.ayush.proms.pojos.UserPOJO;
 import com.ayush.proms.repo.ProjectRepo;
+import com.ayush.proms.service.DocumentService;
 import com.ayush.proms.service.ProjectService;
 import com.ayush.proms.service.UserService;
 import org.springframework.stereotype.Service;
@@ -91,8 +92,14 @@ public class ProjectServiceImpl  implements ProjectService {
 
     @Override
     public Project getById(Long projectId) {
-        return projectRepo.findById(projectId).get();
+        Optional<Project> optionalProject = projectRepo.findById(projectId);
+        if (optionalProject.isPresent()){
+            return optionalProject.get();
+        }else{
+            return null;
+        }
     }
+
 
     @Override
     public List<ProjectPOJO> getAllProjects() {
@@ -131,6 +138,4 @@ public class ProjectServiceImpl  implements ProjectService {
                 .end_date(projectPOJO.getEnd_date())
                 .build();
     }
-
-
 }

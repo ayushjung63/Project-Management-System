@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class UserController extends BaseController {
     }
 
     @PostMapping
-    public ResponseEntity createUser(@RequestBody UserPOJO userPOJO){
+    public ResponseEntity createUser(@Valid @RequestBody UserPOJO userPOJO){
         Long data = userService.createUser(userPOJO);
         if (data>=1){
             return new ResponseEntity(successResponse("Users created Successfully",data), HttpStatus.OK);

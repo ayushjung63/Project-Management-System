@@ -8,6 +8,8 @@ import lombok.*;
 import java.util.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
@@ -21,14 +23,21 @@ public class User extends AuditAbstract {
     @SequenceGenerator(name = "users_sequence",allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "users_sequence")
     private Long id;
+
+
     private String fullName;
+
+
     private String password;
+
+
     private String email;
 
     @Enumerated(value = EnumType.STRING)
     private Faculty faculty;
 
     @Enumerated(value = EnumType.STRING)
+
     private Semester semester;
 
     @ManyToMany(mappedBy = "students")

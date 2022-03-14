@@ -18,11 +18,13 @@ public class Project extends AuditAbstract {
     @SequenceGenerator(name = "project_sequence",allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "project_sequence")
     private Long id;
+
     private String title;
 
     @ElementCollection
     @JoinTable(name = "project_tool_id")
     private List<String> projectTools;
+
     private String shortName;
 
     @Temporal(TemporalType.DATE)
@@ -45,4 +47,7 @@ public class Project extends AuditAbstract {
 
     @Enumerated(value = EnumType.STRING)
     private ProjectStatus projectStatus;
+
+    @OneToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL,mappedBy = "project")
+    private List<Document> documentList;
 }
