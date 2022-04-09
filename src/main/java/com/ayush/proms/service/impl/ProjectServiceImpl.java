@@ -11,6 +11,7 @@ import com.ayush.proms.service.ProjectService;
 import com.ayush.proms.service.UserService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -97,6 +98,21 @@ public class ProjectServiceImpl  implements ProjectService {
             return optionalProject.get();
         }else{
             return null;
+        }
+    }
+
+    @Override
+    public List<ProjectPOJO> getProjectByStatus(ProjectStatus status) {
+        List<Project> projectByStatus = projectRepo.findProjectByStatus(status.toString());
+        List<ProjectPOJO> pojoList=new ArrayList<>();
+        if (projectByStatus.isEmpty() || projectByStatus==null) {
+           return null;
+        }else{
+            for (Project project :
+                    projectByStatus) {
+                pojoList.add(toPOJO(project));
+            }
+            return pojoList;
         }
     }
 

@@ -1,5 +1,6 @@
 package com.ayush.proms.service;
 
+import com.ayush.proms.enums.ProjectStatus;
 import com.ayush.proms.model.Project;
 import com.ayush.proms.pojos.DocumentPOJO;
 import com.ayush.proms.pojos.ProjectPOJO;
@@ -19,5 +20,7 @@ public interface ProjectService {
     Long assignSupervisor(Long projectId, Long supervisorId);
 
     Project getById(Long projectId);
+
+    List<ProjectPOJO> getProjectByStatus(ProjectStatus status);
 
 }

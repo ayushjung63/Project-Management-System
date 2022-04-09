@@ -1,5 +1,6 @@
 package com.ayush.proms.controller;
 
+import com.ayush.proms.enums.ProjectStatus;
 import com.ayush.proms.model.Project;
 import com.ayush.proms.pojos.ProjectPOJO;
 import com.ayush.proms.service.ProjectService;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/project")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ProjectController extends BaseController {
     private final ProjectService projectService;
 
@@ -66,6 +68,16 @@ public class ProjectController extends BaseController {
             return new ResponseEntity(successResponse("Project Supervisor Assigned Successfully",data),HttpStatus.OK);
         }else {
             return new ResponseEntity(errorResponse("Failed to assign supervisor",data),HttpStatus.OK);
+        }
+    }
+
+    @GetMapping(value = "/status/{status}")
+    public ResponseEntity viewProjectByStatus(@PathVariable("status")ProjectStatus status){
+        List<ProjectPOJO> data = projectService.getProjectByStatus(status);
+        if (data!=null){
+            return ResponseEntity.ok(successResponse(customMessageSource.get("crud.get",customMessageSource.get("project")),data));
+        }else {
+            return ResponseEntity.ok(errorResponse(customMessageSource.get("crud.failed",customMessageSource.get("project")),data));
         }
     }
 

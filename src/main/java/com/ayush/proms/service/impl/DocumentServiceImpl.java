@@ -13,12 +13,19 @@ import com.ayush.proms.service.DocumentService;
 import com.ayush.proms.service.FileStorageService;
 import com.ayush.proms.service.ProjectService;
 import com.ayush.proms.service.UserService;
+import com.ayush.proms.utils.CustomMessageSource;
+import com.ayush.proms.utils.EncodeFileToBase64;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
-import java.io.IOException;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -27,12 +34,14 @@ public class DocumentServiceImpl implements DocumentService {
     private final ProjectService projectService;
     private final FileStorageService fileStorageService;
     private final DocumentRepo documentRepo;
+    private final CustomMessageSource customMessageSource;
 
-    public DocumentServiceImpl(UserService userService, ProjectService projectService, FileStorageService fileStorageService, DocumentRepo documentRepo) {
+    public DocumentServiceImpl(UserService userService, ProjectService projectService, FileStorageService fileStorageService, DocumentRepo documentRepo, CustomMessageSource customMessageSource) {
         this.userService = userService;
         this.projectService = projectService;
         this.fileStorageService = fileStorageService;
         this.documentRepo = documentRepo;
+        this.customMessageSource = customMessageSource;
     }
 
     @Override
@@ -54,6 +63,41 @@ public class DocumentServiceImpl implements DocumentService {
         }else{
             throw new ProjectStatusNotValidException("Project has not been accepted.");
         }
+    }
+
+    @Override
+    public String getDocument(Long documentId, String action, HttpServletResponse response) throws IOException {
+        String documentPath = documentRepo.findDocumentPath(documentId);
+        String fileName = documentRepo.findFileName(documentId);
+        if (fileName==null){
+            throw new RuntimeException(customMessageSource.get("file.not.found"));
+        }
+        File file=new File(documentPath);
+        Path path=file.toPath();
+        String extension=FilenameUtils.getExtension(fileName);
+        if (file.exists()){
+            String mimeType = Files.probeContentType(path);
+            if (mimeType == null) {
+                mimeType = "application/octet-stream";
+            }
+            response.setContentType(mimeType);
+            if (extension.equals("docx") || extension.equals("doc") || extension.equals("pdf") ) {
+                response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+            }
+            switch (action) {
+                case "view":
+                    return EncodeFileToBase64.encodeFileToBase64Binary(file);
+                case "download":
+                    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fileName + "\"");
+                    break;
+            }
+            response.setContentLength((int) file.length());
+            InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+            FileCopyUtils.copy(inputStream, response.getOutputStream());
+        } else {
+            throw new RuntimeException(customMessageSource.get("file.not.found"));
+        }
+        return null;
     }
 
 

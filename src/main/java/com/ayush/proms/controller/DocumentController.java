@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @RestController
@@ -29,9 +30,18 @@ public class DocumentController extends BaseController {
             e.printStackTrace();
         }
         if (data>=1){
-            return new ResponseEntity(successResponse("Document Uploaded Successfully",data), HttpStatus.OK);
+            return new ResponseEntity(successResponse(customMessageSource.get("crud.save",customMessageSource.get("document")),data), HttpStatus.OK);
         }else {
-            return new ResponseEntity(errorResponse("Failed to Upload Document",data),HttpStatus.OK);
+            return new ResponseEntity(errorResponse(customMessageSource.get("crud.failed",customMessageSource.get("document")),data),HttpStatus.OK);
         }
     }
+
+    @GetMapping("/view-or-download/view/{documentId}")
+    public ResponseEntity getDocument(@PathVariable("documentId") Long documentId, HttpServletResponse httpServletResponse) throws IOException {
+        String action="view";
+        String jsonData = documentService.getDocument(documentId, action, httpServletResponse);
+        return ResponseEntity.ok(successResponse(customMessageSource.get("document.fetch"),jsonData));
+    }
+
+
 }

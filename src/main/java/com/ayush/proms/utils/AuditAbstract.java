@@ -11,13 +11,15 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.MappedSuperclass;
 import java.sql.Timestamp;
 import java.util.Date;
 
 @Getter
 @Setter
+@MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class AuditAbstract {
+public abstract class AuditAbstract {
     @CreatedBy
     private String createdBy;
 
