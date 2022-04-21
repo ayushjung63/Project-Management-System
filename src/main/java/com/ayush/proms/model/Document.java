@@ -39,4 +39,8 @@ public class Document extends AuditAbstract {
 
     @Enumerated(value = EnumType.STRING)
     private DocumentStatus documentStatus;
+
+    public Document(Long id){
+        this.id=id;
+    }
 }

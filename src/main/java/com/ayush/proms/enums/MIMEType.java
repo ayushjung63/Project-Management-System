@@ -4,5 +4,6 @@ public enum MIMEType {
     PDF,
     DOCX,
     PPTX,
-    OTHERS
+    OTHERS,
+    IMAGE
 }

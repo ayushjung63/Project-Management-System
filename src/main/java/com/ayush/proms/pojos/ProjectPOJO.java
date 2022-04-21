@@ -23,5 +23,6 @@ public class ProjectPOJO {
     private List<UserPOJO> studentList;
     private String supervisor;
     private ProjectStatus projectStatus;
+    private String imageUrl;
 
 }

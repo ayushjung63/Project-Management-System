@@ -50,4 +50,7 @@ public class Project extends AuditAbstract {
 
     @OneToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL,mappedBy = "project")
     private List<Document> documentList;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private Document image;
 }
