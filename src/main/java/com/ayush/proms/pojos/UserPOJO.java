@@ -1,6 +1,7 @@
 package com.ayush.proms.pojos;
 
 import com.ayush.proms.enums.Faculty;
+import com.ayush.proms.enums.Role;
 import com.ayush.proms.enums.Semester;
 import com.ayush.proms.model.Project;
 import lombok.*;
@@ -33,7 +34,9 @@ public class UserPOJO {
     @NotNull(message = "Faculty is compulsory.")
     private Faculty faculty;
 
-    @NotNull(message = "Semester is compulsory.")
     private Semester semester;
+
+    private Role role;
+
     private Set<Project> projects=new HashSet<>();
 }

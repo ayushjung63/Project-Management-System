@@ -24,7 +24,6 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public String store(MultipartFile file) throws IOException {
-
         File directory = new File(filePath);
         String fileName= StringUtils.cleanPath(file.getOriginalFilename());
 

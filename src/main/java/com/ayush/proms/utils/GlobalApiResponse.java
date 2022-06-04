@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class GlobalApiResponse {
-    private ApiResponseStatus responseStatus;
+    private ApiResponseStatus status;
     private String message;
     private Object data;
 }

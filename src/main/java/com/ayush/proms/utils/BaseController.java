@@ -16,7 +16,7 @@ public class BaseController {
 
         public GlobalApiResponse successResponse(String message,Object data){
             GlobalApiResponse globalApiResponse=new GlobalApiResponse();
-            globalApiResponse.setResponseStatus(API_SUCCESS);
+            globalApiResponse.setStatus(API_SUCCESS);
             globalApiResponse.setMessage(message);
             globalApiResponse.setData(data);
             return globalApiResponse;
@@ -24,7 +24,7 @@ public class BaseController {
 
         public GlobalApiResponse errorResponse(String message,Object data){
             GlobalApiResponse globalApiResponse=new GlobalApiResponse();
-            globalApiResponse.setResponseStatus(API_FAIL);
+            globalApiResponse.setStatus(API_FAIL);
             globalApiResponse.setMessage(message);
             globalApiResponse.setData(data);
             return globalApiResponse;

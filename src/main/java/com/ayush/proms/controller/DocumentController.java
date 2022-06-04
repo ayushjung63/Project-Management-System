@@ -12,6 +12,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/document")
+@CrossOrigin(origins = "http://localhost:3000")
 public class DocumentController extends BaseController {
     private final DocumentService documentService;
 
@@ -19,10 +20,9 @@ public class DocumentController extends BaseController {
         this.documentService = documentService;
     }
 
-
     @PostMapping
     public ResponseEntity uploadDocument(@ModelAttribute @RequestBody DocumentPOJO documentPOJO){
-        Long data = null;
+        Long data = 0L;
         try {
             data = documentService.upload(documentPOJO);
         } catch (IOException e) {

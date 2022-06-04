@@ -1,16 +1,21 @@
 package com.ayush.proms.service.impl;
 
 import com.ayush.proms.enums.ProjectStatus;
+import com.ayush.proms.model.Document;
 import com.ayush.proms.model.Project;
 import com.ayush.proms.model.User;
+import com.ayush.proms.pojos.DocumentPOJO;
 import com.ayush.proms.pojos.ProjectPOJO;
 import com.ayush.proms.pojos.UserPOJO;
 import com.ayush.proms.repo.ProjectRepo;
 import com.ayush.proms.service.DocumentService;
 import com.ayush.proms.service.ProjectService;
 import com.ayush.proms.service.UserService;
+import com.ayush.proms.utils.CustomMessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,10 +26,14 @@ public class ProjectServiceImpl  implements ProjectService {
 
     private final ProjectRepo projectRepo;
     private final UserService userService;
+    private final DocumentService documentService;
+    private final CustomMessageSource customMessageSource;
 
-    public ProjectServiceImpl(ProjectRepo projectRepo, UserService userService) {
+    public ProjectServiceImpl(ProjectRepo projectRepo, UserService userService, DocumentService documentService, CustomMessageSource customMessageSource) {
         this.projectRepo = projectRepo;
         this.userService = userService;
+        this.documentService = documentService;
+        this.customMessageSource = customMessageSource;
     }
 
     @Override
@@ -48,10 +57,10 @@ public class ProjectServiceImpl  implements ProjectService {
 
     @Override
     public Integer approveProject(Long projectId) {
-        Project projectToApprove = getById(projectId);
+        ProjectPOJO projectToApprove = getById(projectId);
         if (projectToApprove.getProjectStatus()==ProjectStatus.DRAFT) {
             projectToApprove.setProjectStatus(ProjectStatus.ACCEPTED);
-            Project data = projectRepo.save(projectToApprove);
+            Project data = projectRepo.save(toEntity(projectToApprove));
             if (data != null) {
                 return 1;
             } else {
@@ -64,10 +73,10 @@ public class ProjectServiceImpl  implements ProjectService {
 
     @Override
     public Integer rejectProject(Long projectId) {
-        Project projectToReject = getById(projectId);
+        ProjectPOJO projectToReject = getById(projectId);
         if (projectToReject.getProjectStatus()==ProjectStatus.DRAFT) {
             projectToReject.setProjectStatus(ProjectStatus.REJECTED);
-            Project data = projectRepo.save(projectToReject);
+            Project data = projectRepo.save(toEntity(projectToReject));
             if (data != null) {
                 return 1;
             } else {
@@ -92,10 +101,10 @@ public class ProjectServiceImpl  implements ProjectService {
     }
 
     @Override
-    public Project getById(Long projectId) {
+    public ProjectPOJO getById(Long projectId) {
         Optional<Project> optionalProject = projectRepo.findById(projectId);
         if (optionalProject.isPresent()){
-            return optionalProject.get();
+            return toPOJO(optionalProject.get());
         }else{
             return null;
         }
@@ -113,6 +122,21 @@ public class ProjectServiceImpl  implements ProjectService {
                 pojoList.add(toPOJO(project));
             }
             return pojoList;
+        }
+    }
+
+    @Override
+    public Long uploadImage(DocumentPOJO documentPOJO, Long projectId) throws IOException {
+        Optional<Project> projectOptional = projectRepo.findById(projectId);
+        if (projectOptional.isPresent()){
+            documentPOJO.setType("Image");
+            Long imageId = documentService.upload(documentPOJO);
+            Project project = projectOptional.get();
+            project.setImage(new Document(imageId));
+            projectRepo.save(project);
+            return project.getId();
+        }else{
+            throw new RuntimeException(customMessageSource.get("not.found",customMessageSource.get("project")));
         }
     }
 
@@ -137,6 +161,7 @@ public class ProjectServiceImpl  implements ProjectService {
                 .projectStatus(project.getProjectStatus())
                 .start_date(project.getStart_date())
                 .end_date(project.getEnd_date())
+                .imageUrl(project.getImage()==null ? null : project.getImage().getUrl())
                 .build();
     }
 

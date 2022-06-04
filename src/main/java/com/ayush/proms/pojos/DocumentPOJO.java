@@ -20,4 +20,5 @@ public class DocumentPOJO {
     private MultipartFile multipartFile;
     private Long userId;
     private Long projectId;
+    private String type;
 }
