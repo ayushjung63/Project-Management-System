@@ -1,6 +1,7 @@
 package com.ayush.proms.service;
 
 import com.ayush.proms.model.User;
+import com.ayush.proms.pojos.UserMinimalDetail;
 import com.ayush.proms.pojos.UserPOJO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,5 +21,7 @@ public interface UserService {
 
     public UserPOJO toPOJO(User user);
     public User toEntity(UserPOJO userPOJO);
+
+    List<UserMinimalDetail> getCurrentUserFriends();
 
 }

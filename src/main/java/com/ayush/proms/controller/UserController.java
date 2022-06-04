@@ -1,6 +1,7 @@
 package com.ayush.proms.controller;
 
 import com.ayush.proms.model.User;
+import com.ayush.proms.pojos.UserMinimalDetail;
 import com.ayush.proms.pojos.UserPOJO;
 import com.ayush.proms.service.UserService;
 import com.ayush.proms.utils.BaseController;
@@ -13,17 +14,18 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 
+
 @RestController
-@RequestMapping("/user")
+@RequestMapping("user")
 @CrossOrigin(origins = "http://localhost:3000")
 public class UserController extends BaseController {
-    
+
     private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
-    
+
     @PostMapping("/import-users")
     public ResponseEntity importUsers(@RequestBody MultipartFile file) throws IOException {
         Integer data = userService.importUser(file);
@@ -34,7 +36,7 @@ public class UserController extends BaseController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity createUser(@Valid @RequestBody UserPOJO userPOJO){
         Long data = userService.createUser(userPOJO);
         if (data>=1){
@@ -47,6 +49,18 @@ public class UserController extends BaseController {
     @GetMapping
     public ResponseEntity allUsers()  {
         List<User> data = userService.getAllUsers();
+        if (data!=null){
+            return new ResponseEntity(successResponse("Users fetched Successfully",data), HttpStatus.OK);
+        }else {
+            return new ResponseEntity(errorResponse("Users fetched Successfully",null),HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("/current-user-friends")
+    public ResponseEntity getCurrentUserFriends()  {
+        List<UserMinimalDetail> data = userService.getCurrentUserFriends();
+        System.out.println(data.get(0).getId());
+        System.out.println(data.get(0).getName());
         if (data!=null){
             return new ResponseEntity(successResponse("Users fetched Successfully",data), HttpStatus.OK);
         }else {
