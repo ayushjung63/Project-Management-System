@@ -52,6 +52,10 @@ public class User extends AuditAbstract implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    private String address;
+
+    private String contact;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
@@ -85,5 +89,9 @@ public class User extends AuditAbstract implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public User(Long id) {
+        this.id = id;
     }
 }

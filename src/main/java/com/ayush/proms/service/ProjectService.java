@@ -26,4 +26,11 @@ public interface ProjectService {
     List<ProjectPOJO> getProjectByStatus(ProjectStatus status);
 
     Long uploadImage(DocumentPOJO documentPOJO, Long projectId) throws IOException;
+
+    List<Map<String,Integer>> getProjectCountByType();
+
+    Integer getTotalProjectCount();
+
+    List<ProjectPOJO> getLatestProjects();
+
 }

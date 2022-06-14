@@ -1,4 +1,6 @@
 package com.ayush.proms.model;
+import com.ayush.proms.enums.DocumentType;
+import com.ayush.proms.enums.ProjectType;
 import com.ayush.proms.enums.ProjectStatus;
 import com.ayush.proms.utils.AuditAbstract;
 import lombok.*;
@@ -20,6 +22,9 @@ public class Project extends AuditAbstract {
     private Long id;
 
     private String title;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     @ElementCollection
     @JoinTable(name = "project_tool_id")
@@ -48,9 +53,19 @@ public class Project extends AuditAbstract {
     @Enumerated(value = EnumType.STRING)
     private ProjectStatus projectStatus;
 
+    @Enumerated(value = EnumType.STRING)
+    private DocumentType documentStatus;
+
     @OneToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL,mappedBy = "project")
     private List<Document> documentList;
 
     @OneToOne(cascade = CascadeType.ALL)
     private Document image;
+
+    @Enumerated(EnumType.STRING)
+    private ProjectType projectType;
+
+    public Project(Long id) {
+        this.id = id;
+    }
 }

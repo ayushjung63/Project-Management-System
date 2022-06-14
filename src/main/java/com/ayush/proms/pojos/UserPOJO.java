@@ -31,12 +31,15 @@ public class UserPOJO {
     @NotNull(message = "Email is compulsory.")
     private String email;
 
-    @NotNull(message = "Faculty is compulsory.")
     private Faculty faculty;
 
     private Semester semester;
 
     private Role role;
+
+    private String address;
+
+    private String contact;
 
     private Set<Project> projects=new HashSet<>();
 }

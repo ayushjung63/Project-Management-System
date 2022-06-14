@@ -1,5 +1,6 @@
 package com.ayush.proms.controller;
 
+import com.ayush.proms.pojos.DocumentMinimalDetail;
 import com.ayush.proms.pojos.DocumentPOJO;
 import com.ayush.proms.service.DocumentService;
 import com.ayush.proms.utils.BaseController;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/document")
@@ -21,7 +23,7 @@ public class DocumentController extends BaseController {
     }
 
     @PostMapping
-    public ResponseEntity uploadDocument(@ModelAttribute @RequestBody DocumentPOJO documentPOJO){
+    public ResponseEntity uploadDocument(@ModelAttribute  DocumentPOJO documentPOJO){
         Long data = 0L;
         try {
             data = documentService.upload(documentPOJO);
@@ -43,5 +45,10 @@ public class DocumentController extends BaseController {
         return ResponseEntity.ok(successResponse(customMessageSource.get("document.fetch"),jsonData));
     }
 
+    @GetMapping("/list/project-id/{projectId}")
+    public ResponseEntity getDocumentByProjectId(@PathVariable("projectId") Long projectId) throws IOException {
+        List<DocumentMinimalDetail> documentByProjectId = documentService.getDocumentByProjectId(projectId);
+        return ResponseEntity.ok(successResponse(customMessageSource.get("document.fetch"),documentByProjectId));
+    }
 
 }

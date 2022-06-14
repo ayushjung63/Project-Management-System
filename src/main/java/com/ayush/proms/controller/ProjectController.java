@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/project")
-@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("project")
+@CrossOrigin(origins = "*")
 public class ProjectController extends BaseController {
     private final ProjectService projectService;
 
@@ -101,6 +102,35 @@ public class ProjectController extends BaseController {
             return ResponseEntity.ok(errorResponse(customMessageSource.get("failed.upload",customMessageSource.get("image")),data));
         }
     }
+
+    @GetMapping(value = "/get-count-by-type")
+    public ResponseEntity projectCountWithType() throws IOException {
+        List<Map<String, Integer>> data = projectService.getProjectCountByType();
+        if (data!=null){
+            return ResponseEntity.ok(successResponse(customMessageSource.get("crud.get",customMessageSource.get("project")),data));
+        }else{
+            return new ResponseEntity(errorResponse(customMessageSource.get("not.found",customMessageSource.get("project")),null),HttpStatus.OK);
+        }
+    }
+
+    @GetMapping(value = "/get-project-count")
+    public ResponseEntity projectCount() throws IOException {
+        Integer data = projectService.getTotalProjectCount();
+        if (data!=null){
+            return ResponseEntity.ok(successResponse(customMessageSource.get("crud.get",customMessageSource.get("project")),data));
+        }else{
+            return new ResponseEntity(errorResponse(customMessageSource.get("not.found",customMessageSource.get("project")),null),HttpStatus.OK);
+        }
+    }
+
+    @GetMapping(value = "/get-latest-project")
+    public ResponseEntity latestProjects() throws IOException {
+        List<ProjectPOJO> data = projectService.getLatestProjects();
+        return ResponseEntity.ok(successResponse(customMessageSource.get("crud.get",customMessageSource.get("project")),data));
+
+    }
+
+
 
 
 }

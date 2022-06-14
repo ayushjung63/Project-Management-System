@@ -1,6 +1,8 @@
 package com.ayush.proms.service;
 
 import com.ayush.proms.model.User;
+import com.ayush.proms.pojos.MinimalDetail;
+import com.ayush.proms.pojos.PasswordChangePojo;
 import com.ayush.proms.pojos.UserMinimalDetail;
 import com.ayush.proms.pojos.UserPOJO;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,4 +26,13 @@ public interface UserService {
 
     List<UserMinimalDetail> getCurrentUserFriends();
 
+    void deleteUser(Long userId);
+
+    List<UserMinimalDetail> getUsersByType(String userType);
+
+    UserPOJO getCurrentUser();
+
+    List<Map<String, Integer>> getUserCountByType();
+
+    void changePassword(PasswordChangePojo passwordChangePojo);
 }

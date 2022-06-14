@@ -21,14 +21,14 @@ import java.util.Date;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AuditAbstract {
     @CreatedBy
-    private String createdBy;
+    private Long createdBy;
 
     @Basic
     @CreatedDate
     private Timestamp createdDate;
 
     @LastModifiedBy
-    private String lastModifiedBy;
+    private Long lastModifiedBy;
 
     @Basic
     @LastModifiedDate

@@ -1,6 +1,7 @@
 package com.ayush.proms.service.impl;
 
 import com.ayush.proms.enums.Faculty;
+import com.ayush.proms.enums.Role;
 import com.ayush.proms.enums.Semester;
 import com.ayush.proms.model.User;
 import com.ayush.proms.service.ExcelService;
@@ -58,7 +59,17 @@ public class ExcelServiceImpl implements ExcelService {
                             user.setSemester(Semester.valueOf(currentCellInRow.getStringCellValue().toUpperCase()));
                             break;
                         case 4:
+                            user.setAddress(currentCellInRow.getStringCellValue());
+                            break;
+                        case 5:
+                            user.setContact(String.valueOf(currentCellInRow.getNumericCellValue()));
+                            break;
+                        case 6:
                             user.setPassword(currentCellInRow.getStringCellValue());
+                            break;
+                        case 7:
+                            user.setRole(Role.valueOf(currentCellInRow.getStringCellValue()));
+                            break;
                         default:
                             break;
                     }

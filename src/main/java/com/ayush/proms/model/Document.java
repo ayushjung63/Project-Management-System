@@ -5,6 +5,7 @@ import com.ayush.proms.enums.DocumentType;
 import com.ayush.proms.enums.MIMEType;
 import com.ayush.proms.utils.AuditAbstract;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 
@@ -29,11 +30,11 @@ public class Document extends AuditAbstract {
     @Enumerated(value = EnumType.STRING)
     private MIMEType mimeType;
 
-    @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY,cascade = CascadeType.MERGE)
     @JoinColumn(name = "user_id",foreignKey = @ForeignKey(name = "FK_user"))
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @JoinColumn(name = "project_id",foreignKey = @ForeignKey(name = "FK_project"))
     private Project project;
 

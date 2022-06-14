@@ -1,39 +1,41 @@
 package com.ayush.proms.service.impl;
 
 import com.ayush.proms.enums.ProjectStatus;
-import com.ayush.proms.model.Document;
+import com.ayush.proms.enums.ProjectType;
+import com.ayush.proms.enums.Role;
 import com.ayush.proms.model.Project;
 import com.ayush.proms.model.User;
+import com.ayush.proms.pojos.DocumentMinimalDetail;
 import com.ayush.proms.pojos.DocumentPOJO;
+import com.ayush.proms.pojos.MinimalDetail;
 import com.ayush.proms.pojos.ProjectPOJO;
-import com.ayush.proms.pojos.UserPOJO;
 import com.ayush.proms.repo.ProjectRepo;
 import com.ayush.proms.service.DocumentService;
 import com.ayush.proms.service.ProjectService;
 import com.ayush.proms.service.UserService;
+import com.ayush.proms.utils.AuthenticationUtil;
 import com.ayush.proms.utils.CustomMessageSource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.ayush.proms.enums.Role.ADMIN;
 
 @Service
 public class ProjectServiceImpl  implements ProjectService {
 
     private final ProjectRepo projectRepo;
     private final UserService userService;
-    private final DocumentService documentService;
     private final CustomMessageSource customMessageSource;
+    private final AuthenticationUtil authenticationUtil;
 
-    public ProjectServiceImpl(ProjectRepo projectRepo, UserService userService, DocumentService documentService, CustomMessageSource customMessageSource) {
+    public ProjectServiceImpl(ProjectRepo projectRepo, UserService userService, DocumentService documentService, CustomMessageSource customMessageSource, AuthenticationUtil authenticationUtil) {
         this.projectRepo = projectRepo;
         this.userService = userService;
-        this.documentService = documentService;
         this.customMessageSource = customMessageSource;
+        this.authenticationUtil = authenticationUtil;
     }
 
     @Override
@@ -42,8 +44,14 @@ public class ProjectServiceImpl  implements ProjectService {
         project.setProjectStatus(ProjectStatus.DRAFT);
 
         /* Getting Student object from student Id */
-        List<UserPOJO> studentList = projectPOJO.getStudentList();
+        User currentUser = authenticationUtil.getCurrentUser();
+
+        List<MinimalDetail> studentList = projectPOJO.getStudentList();
         List<User> users = studentList.stream().map(x -> userService.getUserById(x.getId())).collect(Collectors.toList());
+        if (currentUser.getRole()==Role.STUDENT){
+            User userById = userService.getUserById(currentUser.getId());
+            users.add(userById);
+        }
         project.setStudents(users);
 
         /* Saving project to DB*/
@@ -94,6 +102,7 @@ public class ProjectServiceImpl  implements ProjectService {
         if (projectOptional.isPresent()){
             Project project = projectOptional.get();
             project.setSupervisor(supervisor);
+            project.setProjectStatus(ProjectStatus.ACCEPTED);
             projectRepo.save(project);
             return project.getId();
         }
@@ -130,9 +139,8 @@ public class ProjectServiceImpl  implements ProjectService {
         Optional<Project> projectOptional = projectRepo.findById(projectId);
         if (projectOptional.isPresent()){
             documentPOJO.setType("Image");
-            Long imageId = documentService.upload(documentPOJO);
+
             Project project = projectOptional.get();
-            project.setImage(new Document(imageId));
             projectRepo.save(project);
             return project.getId();
         }else{
@@ -143,25 +151,72 @@ public class ProjectServiceImpl  implements ProjectService {
 
     @Override
     public List<ProjectPOJO> getAllProjects() {
-        List<Project> projectList = projectRepo.findAll();
+        User currentUser = authenticationUtil.getCurrentUser();
+        List<Project> projectList=new ArrayList<>();
+        if (currentUser.getRole()== ADMIN) {
+            projectList = projectRepo.findAll();
+        }else if(Role.SUPERVISOR == currentUser.getRole()){
+            projectList=projectRepo.findProjectForSupervisor(currentUser.getId());
+        }else if(Role.STUDENT == currentUser.getRole()){
+            projectList=projectRepo.findProjectForStudent(currentUser.getId());
+        }else{
+            return new ArrayList<>();
+        }
         List<ProjectPOJO> projectPOJOList = projectList.stream().map(x -> toPOJO(x)).collect(Collectors.toList());
         return projectPOJOList;
+    }
+
+    @Override
+    public List<Map<String, Integer>> getProjectCountByType() {
+        List<Map<String, Integer>> projectCountByType = projectRepo.findProjectCountByType();
+        return projectCountByType;
+    }
+
+    @Override
+    public Integer getTotalProjectCount() {
+        User currentUser = authenticationUtil.getCurrentUser();
+        Long currentUserId = currentUser.getId();
+
+        Integer projectCount=0;
+        if (Role.STUDENT.equals(currentUser.getRole())){
+            projectCount=projectRepo.findProjectCountByStudentId(currentUserId);
+        }else if(Role.SUPERVISOR.equals(currentUser.getRole())){
+            projectCount=projectRepo.findProjectCountBySupervisorId(currentUserId);
+        }else{
+            projectCount=projectRepo.findTotalProjectCount();
+        }
+        return projectCount;
+    }
+
+    @Override
+    public List<ProjectPOJO> getLatestProjects() {
+        List<Project> latestProjects = projectRepo.findLatestProjects();
+        if (latestProjects!=null){
+            List<ProjectPOJO> projectPOJOList = latestProjects.stream().map(x -> toPOJO(x)).collect(Collectors.toList());
+            return projectPOJOList;
+        }else{
+            return Collections.EMPTY_LIST;
+        }
+
     }
 
     public ProjectPOJO toPOJO(Project project){
         return ProjectPOJO.builder()
                 .id(project.getId()==null ? null :project.getId())
                 .title(project.getTitle())
+                .description(project.getDescription()==null ? null :project.getDescription())
                 .shortName(project.getShortName())
                 .projectTools(project.getProjectTools())
                 .studentList(
-                        project.getStudents().stream().map(x->userService.toPOJO(x)).collect(Collectors.toList())
+                        project.getStudents().stream().map(x->new MinimalDetail(x.getId(),x.getFullName())).collect(Collectors.toList())
                 )
-                .supervisor(project.getSupervisor()==null ? "Not Assigned " : project.getSupervisor().getFullName())
+                .supervisor(project.getSupervisor()==null ? "Not Assigned" : project.getSupervisor().getFullName())
                 .projectStatus(project.getProjectStatus())
                 .start_date(project.getStart_date())
                 .end_date(project.getEnd_date())
-                .imageUrl(project.getImage()==null ? null : project.getImage().getUrl())
+                .imageId(project.getImage()==null ? null : project.getImage().getId())
+                .documentStatus(project.getDocumentStatus())
+                .projectType(String.valueOf(project.getProjectType()))
                 .build();
     }
 
@@ -169,14 +224,16 @@ public class ProjectServiceImpl  implements ProjectService {
         return Project.builder()
                 .id(projectPOJO.getId()==null? null :projectPOJO.getId())
                 .title(projectPOJO.getTitle())
+                .description(projectPOJO.getDescription()==null ? null :projectPOJO.getDescription())
                 .shortName(projectPOJO.getShortName())
                 .projectTools(projectPOJO.getProjectTools())
                 .students(
-                        projectPOJO.getStudentList().stream().map(x->userService.toEntity(x)).collect(Collectors.toList())
+                        projectPOJO.getStudentList().stream().map(x->new User(x.getId())).collect(Collectors.toList())
                 )
                 .projectStatus(projectPOJO.getProjectStatus())
                 .start_date(projectPOJO.getStart_date())
                 .end_date(projectPOJO.getEnd_date())
+                .projectType(ProjectType.valueOf(projectPOJO.getProjectType()))
                 .build();
     }
 }

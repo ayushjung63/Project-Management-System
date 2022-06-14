@@ -1,23 +1,30 @@
 package com.ayush.proms.service.impl;
 
+import com.ayush.proms.enums.Faculty;
+import com.ayush.proms.enums.Semester;
 import com.ayush.proms.jwt.JwtUtil;
 import com.ayush.proms.model.User;
+import com.ayush.proms.pojos.MinimalDetail;
+import com.ayush.proms.pojos.PasswordChangePojo;
 import com.ayush.proms.pojos.UserMinimalDetail;
 import com.ayush.proms.pojos.UserPOJO;
 import com.ayush.proms.repo.UserRepo;
 import com.ayush.proms.service.ExcelService;
 import com.ayush.proms.service.UserService;
 import com.ayush.proms.utils.AuthenticationUtil;
+import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -107,9 +114,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .id(userPOJO.getId()==null ? null :userPOJO.getId())
                 .fullName(userPOJO.getFullName())
                 .email(userPOJO.getEmail())
-                .semester(userPOJO.getSemester())
-                .faculty(userPOJO.getFaculty())
-                .password(passwordEncoder.encode(userPOJO.getPassword()))
+                .semester(userPOJO.getSemester()==null ? Semester.NA : userPOJO.getSemester())
+                .faculty(userPOJO.getFaculty()==null ? Faculty.NA :userPOJO.getFaculty())
+                .password(userPOJO.getPassword()==null ?null: passwordEncoder.encode(userPOJO.getPassword()))
+                .address(userPOJO.getAddress())
+                .contact(userPOJO.getContact())
                 .role(userPOJO.getRole())
                 .build();
     }
@@ -132,6 +141,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .email(user.getEmail())
                 .faculty(user.getFaculty())
                 .semester(user.getSemester()==null ? null : user.getSemester())
+                .address(user.getAddress())
+                .contact(user.getContact())
                 .role(user.getRole())
                 .build();
     }
@@ -139,5 +150,53 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
         return  userRepo.findUserByEmail(username);
+    }
+
+
+    @Override
+    public void deleteUser(Long userId) {
+        try {
+            userRepo.deleteById(userId);
+        }catch(Exception e){
+            throw new RuntimeException(e.getLocalizedMessage());
+        }
+    }
+
+    @Override
+    public List<UserMinimalDetail> getUsersByType(String userType) {
+        List<UserMinimalDetail> usersByType = userRepo.findUsersByType(userType);
+        if (usersByType!=null){
+            return usersByType;
+        }else{
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public UserPOJO getCurrentUser() {
+        User currentUser = authenticationUtil.getCurrentUser();
+        if (currentUser!=null){
+            return toPOJO(currentUser);
+        }else{
+            return new UserPOJO();
+        }
+    }
+
+    @Override
+    public List<Map<String, Integer>> getUserCountByType() {
+        List<Map<String, Integer>> userCountByType = userRepo.findUserCountByType();
+        return userCountByType;
+    }
+
+    @Transactional
+    @Override
+    public void changePassword(PasswordChangePojo passwordChangePojo) {
+        User currentUser = authenticationUtil.getCurrentUser();
+        if (passwordEncoder.matches(passwordChangePojo.getCurrentPassword(),currentUser.getPassword())){
+            currentUser.setPassword(passwordEncoder.encode(passwordChangePojo.getNewPassword()));
+            userRepo.save(currentUser);
+        }else{
+            throw new RuntimeException("Please enter correct current password.");
+        }
     }
 }
