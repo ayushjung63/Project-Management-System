@@ -28,5 +28,6 @@ public class ProjectPOJO {
     private Long imageId;
     private DocumentType documentStatus;
     private String projectType;
+    private Long[] studentIds;
 
 }

@@ -1,6 +1,7 @@
 package com.ayush.proms.model;
 
 import com.ayush.proms.enums.Status;
+import com.ayush.proms.utils.AuditAbstract;
 import lombok.*;
 
 import javax.persistence.*;
@@ -12,7 +13,7 @@ import javax.persistence.*;
 @Builder
 @Entity
 @Table(name = "task")
-public class Task {
+public class Task extends AuditAbstract {
 
     @Id
     @SequenceGenerator(name = "task_sequence",sequenceName = "task_sequence",allocationSize = 1)

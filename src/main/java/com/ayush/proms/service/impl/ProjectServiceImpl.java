@@ -46,13 +46,18 @@ public class ProjectServiceImpl  implements ProjectService {
         /* Getting Student object from student Id */
         User currentUser = authenticationUtil.getCurrentUser();
 
-        List<MinimalDetail> studentList = projectPOJO.getStudentList();
-        List<User> users = studentList.stream().map(x -> userService.getUserById(x.getId())).collect(Collectors.toList());
+        /*List<MinimalDetail> studentList = projectPOJO.getStudentList();*/
+
+
+        List<User> studentList=new ArrayList<>();
+        for (Long studentId:projectPOJO.getStudentIds()){
+            studentList.add(userService.getUserById(studentId));
+        }
         if (currentUser.getRole()==Role.STUDENT){
             User userById = userService.getUserById(currentUser.getId());
-            users.add(userById);
+            studentList.add(userById);
         }
-        project.setStudents(users);
+        project.setStudents(studentList);
 
         /* Saving project to DB*/
         Project data = projectRepo.save(project);
@@ -227,9 +232,6 @@ public class ProjectServiceImpl  implements ProjectService {
                 .description(projectPOJO.getDescription()==null ? null :projectPOJO.getDescription())
                 .shortName(projectPOJO.getShortName())
                 .projectTools(projectPOJO.getProjectTools())
-                .students(
-                        projectPOJO.getStudentList().stream().map(x->new User(x.getId())).collect(Collectors.toList())
-                )
                 .projectStatus(projectPOJO.getProjectStatus())
                 .start_date(projectPOJO.getStart_date())
                 .end_date(projectPOJO.getEnd_date())

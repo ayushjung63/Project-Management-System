@@ -17,7 +17,11 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlEnum;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",uniqueConstraints = {
+        @UniqueConstraint(name = "UNIQUE_user_email", columnNames = {"email"}),
+        @UniqueConstraint(name = "UNIQUE_user_phone", columnNames = {"contact"}),
+}
+)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -35,7 +39,7 @@ public class User extends AuditAbstract implements UserDetails {
 
     private String password;
 
-
+    @Column(name = "email")
     private String email;
 
     @Enumerated(value = EnumType.STRING)
@@ -54,6 +58,7 @@ public class User extends AuditAbstract implements UserDetails {
 
     private String address;
 
+    @Column(name = "contact")
     private String contact;
 
     @Override
