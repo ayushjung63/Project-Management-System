@@ -24,8 +24,6 @@ public class UserPOJO {
     @Size(min = 5,message = "Full Name cannot be less than 5 characters..")
     private String fullName;
 
-    @NotNull(message = "Password is compulsory.")
-    @Size(min = 8,message = "Password cannot be less than 8 characters.")
     private String password;
 
     @NotNull(message = "Email is compulsory.")

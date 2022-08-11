@@ -1,6 +1,7 @@
 package com.ayush.proms.security;
 import com.ayush.proms.jwt.JwtRequestFilter;
 import com.ayush.proms.service.impl.UserServiceImpl;
+import com.ayush.proms.service.impl.UserServiceImplZ;
 import org.apache.catalina.filters.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,10 +21,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private final UserServiceImpl userService;
+    private final UserServiceImplZ userService;
     private final JwtRequestFilter jwtRequestFilter;
 
-    public SecurityConfig(UserServiceImpl userService, JwtRequestFilter jwtRequestFilter) {
+    public SecurityConfig(UserServiceImplZ userService, JwtRequestFilter jwtRequestFilter) {
         this.userService = userService;
         this.jwtRequestFilter = jwtRequestFilter;
     }
@@ -46,7 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
                 .and()
-                .authorizeRequests().antMatchers("/get-token").permitAll()
+                .authorizeRequests().antMatchers("/get-token","/user/register").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling()

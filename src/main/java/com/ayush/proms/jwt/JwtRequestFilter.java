@@ -1,6 +1,7 @@
 package com.ayush.proms.jwt;
 
 import com.ayush.proms.service.impl.UserServiceImpl;
+import com.ayush.proms.service.impl.UserServiceImplZ;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,10 +17,10 @@ import java.io.IOException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-    private final UserServiceImpl userService;
+    private final UserServiceImplZ userService;
     private final JwtUtil jwtUtil;
 
-    public JwtRequestFilter(UserServiceImpl userService, JwtUtil jwtUtil) {
+    public JwtRequestFilter(UserServiceImplZ userService, JwtUtil jwtUtil) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
     }

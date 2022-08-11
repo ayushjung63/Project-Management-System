@@ -22,7 +22,7 @@ public class ProjectPOJO {
     private Date start_date;
     private Date end_date;
     private List<String> projectTools=new ArrayList<>();
-    private List<MinimalDetail> studentList;
+    private List<MinimalDetail> studentList=new ArrayList<>();
     private String supervisor;
     private ProjectStatus projectStatus;
     private Long imageId;

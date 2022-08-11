@@ -36,7 +36,6 @@ public class User extends AuditAbstract implements UserDetails {
 
     private String fullName;
 
-
     private String password;
 
     @Column(name = "email")

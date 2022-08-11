@@ -1,5 +1,6 @@
 package com.ayush.proms.service;
 
+import com.ayush.proms.mail.Email;
 import com.ayush.proms.model.User;
 import com.ayush.proms.pojos.MinimalDetail;
 import com.ayush.proms.pojos.PasswordChangePojo;
@@ -35,4 +36,8 @@ public interface UserService {
     List<Map<String, Integer>> getUserCountByType();
 
     void changePassword(PasswordChangePojo passwordChangePojo);
+
+    void sendMail(UserPOJO user);
+
+    void sendMail(List<UserPOJO> user);
 }

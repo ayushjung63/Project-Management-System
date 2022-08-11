@@ -10,7 +10,8 @@ import java.util.*;
 @Repository
 public interface UserRepo extends JpaRepository<User,Long> {
 
-    User findUserByEmail(String email);
+    @Query(nativeQuery=true,value="select  * from users u where u.email= ?1 ")
+    Optional<User> findUserByEmail(String email);
 
     @Query(nativeQuery=true,value="select u.id as id, u.full_name as name from users u where u.faculty=?1 and u.semester=?2 and u.id != ?3 and u.role='STUDENT'")
     Optional<List<UserMinimalDetail>> findUserBySemesterAndFaculty(String faculty, String semester, Long id);

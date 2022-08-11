@@ -3,9 +3,10 @@ package com.ayush.proms.service.impl;
 import com.ayush.proms.enums.ProjectStatus;
 import com.ayush.proms.enums.ProjectType;
 import com.ayush.proms.enums.Role;
+import com.ayush.proms.mail.Email;
+import com.ayush.proms.mail.EmailSender;
 import com.ayush.proms.model.Project;
 import com.ayush.proms.model.User;
-import com.ayush.proms.pojos.DocumentMinimalDetail;
 import com.ayush.proms.pojos.DocumentPOJO;
 import com.ayush.proms.pojos.MinimalDetail;
 import com.ayush.proms.pojos.ProjectPOJO;
@@ -30,12 +31,14 @@ public class ProjectServiceImpl  implements ProjectService {
     private final UserService userService;
     private final CustomMessageSource customMessageSource;
     private final AuthenticationUtil authenticationUtil;
+    private final EmailSender emailSender;
 
-    public ProjectServiceImpl(ProjectRepo projectRepo, UserService userService, DocumentService documentService, CustomMessageSource customMessageSource, AuthenticationUtil authenticationUtil) {
+    public ProjectServiceImpl(ProjectRepo projectRepo, UserService userService, DocumentService documentService, CustomMessageSource customMessageSource, AuthenticationUtil authenticationUtil, EmailSender emailSender) {
         this.projectRepo = projectRepo;
         this.userService = userService;
         this.customMessageSource = customMessageSource;
         this.authenticationUtil = authenticationUtil;
+        this.emailSender = emailSender;
     }
 
     @Override
@@ -50,8 +53,10 @@ public class ProjectServiceImpl  implements ProjectService {
 
 
         List<User> studentList=new ArrayList<>();
-        for (Long studentId:projectPOJO.getStudentIds()){
-            studentList.add(userService.getUserById(studentId));
+        if (projectPOJO.getStudentIds() != null) {
+            for (Long studentId : projectPOJO.getStudentIds()) {
+                studentList.add(userService.getUserById(studentId));
+            }
         }
         if (currentUser.getRole()==Role.STUDENT){
             User userById = userService.getUserById(currentUser.getId());
@@ -109,6 +114,16 @@ public class ProjectServiceImpl  implements ProjectService {
             project.setSupervisor(supervisor);
             project.setProjectStatus(ProjectStatus.ACCEPTED);
             projectRepo.save(project);
+            emailSender.sendSupervisorAssignedMail(
+                    Email.builder()
+                            .to(supervisor.getEmail())
+                            .body("" +
+                                    "Dear, "+supervisor.getFullName()+"\n" +
+                                    "You have been assigned to "+ project.getTitle()+" ." +
+                                    "Please visit ProMIS for more details."
+                            )
+                            .build()
+            );
             return project.getId();
         }
         return 0L;
@@ -232,7 +247,6 @@ public class ProjectServiceImpl  implements ProjectService {
                 .description(projectPOJO.getDescription()==null ? null :projectPOJO.getDescription())
                 .shortName(projectPOJO.getShortName())
                 .projectTools(projectPOJO.getProjectTools())
-                .projectStatus(projectPOJO.getProjectStatus())
                 .start_date(projectPOJO.getStart_date())
                 .end_date(projectPOJO.getEnd_date())
                 .projectType(ProjectType.valueOf(projectPOJO.getProjectType()))

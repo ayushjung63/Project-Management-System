@@ -5,6 +5,7 @@ import com.ayush.proms.model.User;
 import com.ayush.proms.pojos.JwtResponse;
 import com.ayush.proms.pojos.LoginRequest;
 import com.ayush.proms.service.impl.UserServiceImpl;
+import com.ayush.proms.service.impl.UserServiceImplZ;
 import com.ayush.proms.utils.BaseController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,10 +25,10 @@ public class AuthController extends BaseController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    private final UserServiceImpl userService;
+    private final UserServiceImplZ userService;
     private final JwtUtil jwtUtil;
 
-    public AuthController(UserServiceImpl userService, JwtUtil jwtUtil) {
+    public AuthController(UserServiceImplZ userService, JwtUtil jwtUtil) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
     }
@@ -42,7 +43,7 @@ public class AuthController extends BaseController {
             e.printStackTrace();
             return new ResponseEntity(errorResponse("Bad Credentials",null),HttpStatus.OK);
         }
-        User user = userService.loadUserByUsername(loginRequest.getEmail());
+        User user = (User) userService.loadUserByUsername(loginRequest.getEmail());
         String jwt = jwtUtil.generateToken(user);
         String role= user.getRole().toString();
         return new ResponseEntity(successResponse("Login successful",new JwtResponse(jwt,role)),HttpStatus.OK);

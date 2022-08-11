@@ -2,9 +2,9 @@ package com.ayush.proms.service.impl;
 
 import com.ayush.proms.enums.Faculty;
 import com.ayush.proms.enums.Semester;
-import com.ayush.proms.jwt.JwtUtil;
+import com.ayush.proms.mail.Email;
+import com.ayush.proms.mail.EmailSender;
 import com.ayush.proms.model.User;
-import com.ayush.proms.pojos.MinimalDetail;
 import com.ayush.proms.pojos.PasswordChangePojo;
 import com.ayush.proms.pojos.UserMinimalDetail;
 import com.ayush.proms.pojos.UserPOJO;
@@ -12,10 +12,10 @@ import com.ayush.proms.repo.UserRepo;
 import com.ayush.proms.service.ExcelService;
 import com.ayush.proms.service.UserService;
 import com.ayush.proms.utils.AuthenticationUtil;
-import net.bytebuddy.implementation.bind.annotation.RuntimeType;
+import com.ayush.proms.utils.PasswordGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,25 +28,35 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements UserService, UserDetailsService {
+@Transactional
+public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final ExcelService excelService;
     private final AuthenticationUtil authenticationUtil;
+    private final EmailSender emailSender;
 
     @Autowired
-    private  PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
 
-    public UserServiceImpl(UserRepo userRepo, ExcelService excelService, JwtUtil jwtUtil, AuthenticationUtil authenticationUtil) {
+
+    public UserServiceImpl(UserRepo userRepo, ExcelService excelService, AuthenticationUtil authenticationUtil, EmailSender emailSender) {
         this.userRepo = userRepo;
         this.excelService = excelService;
         this.authenticationUtil = authenticationUtil;
+        this.emailSender = emailSender;
     }
 
     @Override
     public Long createUser(UserPOJO userPOJO) {
-        User user = userRepo.save(toEntity(userPOJO));
+        User entity = toEntity(userPOJO);
+        String randomPassword = PasswordGenerator.generateRandomPassword();
+        entity.setPassword(passwordEncoder.encode(randomPassword));
+        User user = userRepo.save(entity);
         if (user!=null){
+            userPOJO.setEmail(user.getEmail());
+            userPOJO.setPassword(randomPassword);
+            sendMail(userPOJO);
             return user.getId();
         }else{
             return 0L;
@@ -56,14 +66,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public Integer importUser(MultipartFile file) throws IOException {
         List<User> userList = excelService.convertToEntity(file.getInputStream());
+        List<UserPOJO> pojoList=new ArrayList<>();
         if (userList==null){
             return 0;
         }else {
             for (User user:
                  userList) {
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
+                String randomPassword = PasswordGenerator.generateRandomPassword();
+                UserPOJO userPOJO = UserPOJO.builder().email(user.getEmail()).password(randomPassword).build();
+                pojoList.add(userPOJO);
+                user.setPassword(passwordEncoder.encode(randomPassword));
             }
             List<User> users = userRepo.saveAll(userList);
+            sendMail(pojoList);
             return 1;
         }
     }
@@ -116,7 +131,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .email(userPOJO.getEmail())
                 .semester(userPOJO.getSemester()==null ? Semester.NA : userPOJO.getSemester())
                 .faculty(userPOJO.getFaculty()==null ? Faculty.NA :userPOJO.getFaculty())
-                .password(userPOJO.getPassword()==null ?null: passwordEncoder.encode(userPOJO.getPassword()))
                 .address(userPOJO.getAddress())
                 .contact(userPOJO.getContact())
                 .role(userPOJO.getRole())
@@ -147,10 +161,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .build();
     }
 
-    @Override
-    public User loadUserByUsername(String username) throws UsernameNotFoundException {
-        return  userRepo.findUserByEmail(username);
-    }
+
 
 
     @Override
@@ -197,6 +208,42 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             userRepo.save(currentUser);
         }else{
             throw new RuntimeException("Please enter correct current password.");
+        }
+    }
+
+    @Async
+    @Override
+    public void sendMail(UserPOJO user) {
+        Email email= Email.builder()
+                .to(user.getEmail())
+                .from("promis.activation@gmail.com")
+                .body("Dear "+user.getFullName()+", \n"+
+                        "Please find your login credential for the project management system. \n \n "+
+                        "Username: "+user.getEmail()+"\n"+ "Password: "+user.getPassword()+
+                        "\n \n \n" +
+                        "Note: Please do not share your login credential with anyone. Dont forgot to change the default password after you login.\n"+
+                        "Thank You!!"
+                )
+                .build();
+        emailSender.sendLoginCredential(email);
+    }
+
+    @Async
+    @Override
+    public void sendMail(List<UserPOJO> pojoList) {
+        for (UserPOJO user:pojoList) {
+            Email email = Email.builder()
+                    .to(user.getEmail())
+                    .from("promis.activation@gmail.com")
+                    .body("Dear " + user.getFullName() + ", \n" +
+                            "Please find your login credential for the project management system. \n \n " +
+                            "Username: " + user.getEmail() + "\n" + "Password: " + user.getPassword() +
+                            "\n \n \n" +
+                            "Note: Please do not share your login credential with anyone. Dont forgot to change the default password after you login.\n" +
+                            "Thank You!!"
+                    )
+                    .build();
+            emailSender.sendLoginCredential(email);
         }
     }
 }
