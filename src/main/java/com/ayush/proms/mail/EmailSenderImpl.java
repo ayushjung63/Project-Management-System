@@ -4,11 +4,14 @@ import com.ayush.proms.pojos.UserPOJO;
 import com.ayush.proms.repo.EmailCredentialRepo;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@EnableAsync
 public class EmailSenderImpl implements EmailSender {
 
     private final JavaMailSender javaMailSender;
@@ -17,6 +20,7 @@ public class EmailSenderImpl implements EmailSender {
         this.javaMailSender = javaMailSender;
     }
 
+    @Async
     @Override
     public void sendLoginCredential(Email email) {
         SimpleMailMessage message=
@@ -32,6 +36,7 @@ public class EmailSenderImpl implements EmailSender {
     }
 
 
+    @Async
     @Override
     public void sendSupervisorAssignedMail(Email email) {
         SimpleMailMessage message=

@@ -1,7 +1,8 @@
-/*
 package com.ayush.proms.utils;
 
 import com.ayush.proms.model.User;
+import org.apache.poi.ss.formula.functions.T;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -12,6 +13,8 @@ import java.util.Optional;
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class AuditConfig {
+
+    @Autowired
     private AuthenticationUtil authenticationUtil;
 
     @Bean
@@ -21,11 +24,10 @@ public class AuditConfig {
 
     public class SpringSecurityAuditorAware implements AuditorAware {
         @Override
-        public Optional<String> getCurrentAuditor() {
+        public Optional<Long> getCurrentAuditor() {
             User currentUser = authenticationUtil.getCurrentUser();
-            return Optional.ofNullable(currentUser.getFullName());
+            return Optional.ofNullable(currentUser.getId());
         }
 
     }
 }
-*/

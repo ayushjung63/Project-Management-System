@@ -13,7 +13,7 @@ public interface ProjectService {
 
     List<ProjectPOJO> getAllProjects();
 
-    Integer createProject(ProjectPOJO projectPOJO);
+    Integer createProject(ProjectPOJO projectPOJO) throws IOException;
 
     Integer approveProject(Long projectId);
 

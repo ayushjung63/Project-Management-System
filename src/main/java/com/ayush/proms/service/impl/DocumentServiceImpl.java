@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 @Service
 public class DocumentServiceImpl implements DocumentService {
 
-    private final UserService userService;
     private final FileStorageService fileStorageService;
     private final DocumentRepo documentRepo;
     private final CustomMessageSource customMessageSource;
@@ -43,8 +42,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Autowired
     private ProjectRepo projectRepo;
 
-    public DocumentServiceImpl(UserService userService, FileStorageService fileStorageService, DocumentRepo documentRepo, CustomMessageSource customMessageSource, AuthenticationUtil authenticationUtil) {
-        this.userService = userService;
+    public DocumentServiceImpl( FileStorageService fileStorageService, DocumentRepo documentRepo, CustomMessageSource customMessageSource, AuthenticationUtil authenticationUtil) {
         this.fileStorageService = fileStorageService;
         this.documentRepo = documentRepo;
         this.customMessageSource = customMessageSource;

@@ -158,6 +158,7 @@ public class UserServiceImpl implements UserService {
                 .address(user.getAddress())
                 .contact(user.getContact())
                 .role(user.getRole())
+                .passwordChanged(user.isPasswordChanged())
                 .build();
     }
 
@@ -205,13 +206,13 @@ public class UserServiceImpl implements UserService {
         User currentUser = authenticationUtil.getCurrentUser();
         if (passwordEncoder.matches(passwordChangePojo.getCurrentPassword(),currentUser.getPassword())){
             currentUser.setPassword(passwordEncoder.encode(passwordChangePojo.getNewPassword()));
+            currentUser.setPasswordChanged(true);
             userRepo.save(currentUser);
         }else{
             throw new RuntimeException("Please enter correct current password.");
         }
     }
 
-    @Async
     @Override
     public void sendMail(UserPOJO user) {
         Email email= Email.builder()
@@ -228,7 +229,6 @@ public class UserServiceImpl implements UserService {
         emailSender.sendLoginCredential(email);
     }
 
-    @Async
     @Override
     public void sendMail(List<UserPOJO> pojoList) {
         for (UserPOJO user:pojoList) {

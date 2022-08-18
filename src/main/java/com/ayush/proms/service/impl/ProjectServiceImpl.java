@@ -5,6 +5,7 @@ import com.ayush.proms.enums.ProjectType;
 import com.ayush.proms.enums.Role;
 import com.ayush.proms.mail.Email;
 import com.ayush.proms.mail.EmailSender;
+import com.ayush.proms.model.Document;
 import com.ayush.proms.model.Project;
 import com.ayush.proms.model.User;
 import com.ayush.proms.pojos.DocumentPOJO;
@@ -32,17 +33,19 @@ public class ProjectServiceImpl  implements ProjectService {
     private final CustomMessageSource customMessageSource;
     private final AuthenticationUtil authenticationUtil;
     private final EmailSender emailSender;
+    private final DocumentService documentService;
 
-    public ProjectServiceImpl(ProjectRepo projectRepo, UserService userService, DocumentService documentService, CustomMessageSource customMessageSource, AuthenticationUtil authenticationUtil, EmailSender emailSender) {
+    public ProjectServiceImpl(ProjectRepo projectRepo, UserService userService, DocumentService documentService, CustomMessageSource customMessageSource, AuthenticationUtil authenticationUtil, EmailSender emailSender, DocumentService documentService1) {
         this.projectRepo = projectRepo;
         this.userService = userService;
         this.customMessageSource = customMessageSource;
         this.authenticationUtil = authenticationUtil;
         this.emailSender = emailSender;
+        this.documentService = documentService1;
     }
 
     @Override
-    public Integer createProject(ProjectPOJO projectPOJO) {
+    public Integer createProject(ProjectPOJO projectPOJO) throws IOException {
         Project project =toEntity(projectPOJO);
         project.setProjectStatus(ProjectStatus.DRAFT);
 
@@ -64,6 +67,14 @@ public class ProjectServiceImpl  implements ProjectService {
         }
         project.setStudents(studentList);
 
+        if(projectPOJO.getImage() != null) {
+            Long imageId = documentService.upload(
+                    DocumentPOJO.builder()
+                            .multipartFile(projectPOJO.getImage())
+                            .build()
+            );
+            project.setImage(new Document(imageId));
+        }
         /* Saving project to DB*/
         Project data = projectRepo.save(project);
         if (data!=null){

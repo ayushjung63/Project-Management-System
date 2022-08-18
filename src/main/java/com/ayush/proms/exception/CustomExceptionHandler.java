@@ -34,6 +34,10 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 String message=customMessageSource.get(datas[datas.length-1]);
                 errors.add(customMessageSource.get("error.already.exist",customMessageSource.get(message)));
             }
+            if (violation.getConstraintName().contains("fk_user")){
+                String[] datas=violation.getConstraintName().split("_");
+                errors.add(customMessageSource.get("cannot.delete",customMessageSource.get(datas[1])));
+            }
 
             ApiError apiError=new ApiError(ApiResponseStatus.FAIL,httpStatus.value(),errors.get(0));
             return new ResponseEntity<>(apiError, new HttpHeaders(), httpStatus);

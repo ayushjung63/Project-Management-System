@@ -4,6 +4,7 @@ import com.ayush.proms.enums.DocumentType;
 import com.ayush.proms.enums.ProjectStatus;
 import com.ayush.proms.model.User;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.util.*;
@@ -29,5 +30,7 @@ public class ProjectPOJO {
     private DocumentType documentStatus;
     private String projectType;
     private Long[] studentIds;
+
+    private MultipartFile image;
 
 }

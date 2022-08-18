@@ -6,6 +6,7 @@ import com.ayush.proms.enums.Semester;
 import com.ayush.proms.utils.AuditAbstract;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -59,6 +60,17 @@ public class User extends AuditAbstract implements UserDetails {
 
     @Column(name = "contact")
     private String contact;
+
+    @Column(name = "is_password_changed", columnDefinition = "bool default false",nullable = false)
+    private boolean passwordChanged=false;
+
+    public boolean isPasswordChanged() {
+        return passwordChanged;
+    }
+
+    public void setPasswordChanged(boolean passwordChanged) {
+        this.passwordChanged = passwordChanged;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

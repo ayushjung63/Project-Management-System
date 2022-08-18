@@ -39,5 +39,7 @@ public class UserPOJO {
 
     private String contact;
 
+    private boolean passwordChanged;
+
     private Set<Project> projects=new HashSet<>();
 }

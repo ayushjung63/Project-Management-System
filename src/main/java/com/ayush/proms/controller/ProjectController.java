@@ -24,7 +24,7 @@ public class ProjectController extends BaseController {
     }
 
     @PostMapping
-    public ResponseEntity createProject(@RequestBody ProjectPOJO projectPOJO){
+    public ResponseEntity createProject(@ModelAttribute @RequestBody ProjectPOJO projectPOJO) throws IOException {
         Integer data = projectService.createProject(projectPOJO);
         if (data>=1){
             return new ResponseEntity(successResponse("Project Submitted Successfully",data),HttpStatus.OK);
