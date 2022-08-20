@@ -54,7 +54,7 @@ public class DocumentServiceImpl implements DocumentService {
         String fileUrl = fileStorageService.store(documentPOJO.getMultipartFile());
         String extension = FilenameUtils.getExtension(documentPOJO.getMultipartFile().getOriginalFilename());
         if ( ! "pdf".equals(extension)) {
-                throw new RuntimeException("Please upload pdf file only.    ");
+                throw new RuntimeException("Please upload pdf file only.");
         }
         validDocumentFlow(documentPOJO.getProjectId(),documentPOJO.getDocumentType());
 
