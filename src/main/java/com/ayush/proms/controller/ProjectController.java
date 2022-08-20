@@ -24,7 +24,7 @@ public class ProjectController extends BaseController {
     }
 
     @PostMapping
-    public ResponseEntity createProject(@ModelAttribute @RequestBody ProjectPOJO projectPOJO) throws IOException {
+    public ResponseEntity createProject(@RequestBody ProjectPOJO projectPOJO) throws IOException {
         Integer data = projectService.createProject(projectPOJO);
         if (data>=1){
             return new ResponseEntity(successResponse("Project Submitted Successfully",data),HttpStatus.OK);
@@ -130,6 +130,12 @@ public class ProjectController extends BaseController {
 
     }
 
+    @DeleteMapping(value = "/delete/project-id/{projectId}")
+    public ResponseEntity deleteProject(@PathVariable("projectId") Long projectId) throws IOException {
+        projectService.deleteProject(projectId);
+        return ResponseEntity.ok(successResponse(customMessageSource.get("crud.delete",customMessageSource.get("project")),null));
+
+    }
 
 
 

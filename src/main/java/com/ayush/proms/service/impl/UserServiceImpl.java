@@ -66,20 +66,24 @@ public class UserServiceImpl implements UserService {
     @Override
     public Integer importUser(MultipartFile file) throws IOException {
         List<User> userList = excelService.convertToEntity(file.getInputStream());
-        List<UserPOJO> pojoList=new ArrayList<>();
-        if (userList==null){
-            return 0;
-        }else {
-            for (User user:
-                 userList) {
-                String randomPassword = PasswordGenerator.generateRandomPassword();
-                UserPOJO userPOJO = UserPOJO.builder().email(user.getEmail()).password(randomPassword).build();
-                pojoList.add(userPOJO);
-                user.setPassword(passwordEncoder.encode(randomPassword));
+        if (userList.size() >0 ) {
+            List<UserPOJO> pojoList = new ArrayList<>();
+            if (userList == null) {
+                return 0;
+            } else {
+                for (User user :
+                        userList) {
+                    String randomPassword = PasswordGenerator.generateRandomPassword();
+                    UserPOJO userPOJO = UserPOJO.builder().email(user.getEmail()).password(randomPassword).build();
+                    pojoList.add(userPOJO);
+                    user.setPassword(passwordEncoder.encode(randomPassword));
+                }
+                List<User> users = userRepo.saveAll(userList);
+                sendMail(pojoList);
+                return 1;
             }
-            List<User> users = userRepo.saveAll(userList);
-            sendMail(pojoList);
-            return 1;
+        }else{
+            throw new RuntimeException("No data found");
         }
     }
 

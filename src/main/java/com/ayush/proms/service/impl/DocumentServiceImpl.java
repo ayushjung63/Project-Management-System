@@ -52,6 +52,12 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public Long upload(DocumentPOJO documentPOJO) throws IOException {
         String fileUrl = fileStorageService.store(documentPOJO.getMultipartFile());
+        String extension = FilenameUtils.getExtension(documentPOJO.getMultipartFile().getOriginalFilename());
+        if ( ! "pdf".equals(extension)) {
+                throw new RuntimeException("Please upload pdf file only.    ");
+        }
+        validDocumentFlow(documentPOJO.getProjectId(),documentPOJO.getDocumentType());
+
         Document document = toEntity(documentPOJO);
         document.setUrl(fileUrl);
         document.setMimeType(getMIMEType(documentPOJO.getMultipartFile()));
@@ -81,31 +87,49 @@ public class DocumentServiceImpl implements DocumentService {
         }
     }
 
+
+    public void validDocumentFlow(Long projectId, DocumentType documentType){
+        List<Document> uploadedDocs =new ArrayList<>();
+        DocumentType checkAgainst;
+        if (DocumentType.MID_EVALUATION.equals(documentType)) {
+            checkAgainst=DocumentType.PROPOSAL;
+        }
+        else if (DocumentType.FINAL_DEFENSE.equals(documentType)){
+            checkAgainst=DocumentType.MID_EVALUATION;
+        }else{
+           return;
+        }
+        uploadedDocs=documentRepo.findDocumentByProjectIdAndStatus(projectId,checkAgainst.name());
+        if (uploadedDocs.size() == 0) {
+            throw new RuntimeException("Upload " + checkAgainst + " document first");
+        }
+    }
+
     @Override
     public String getDocument(Long documentId, String action, HttpServletResponse response) throws IOException {
         String documentPath = documentRepo.findDocumentPath(documentId);
-        String fileName = documentRepo.findFileName(documentId);
-        if (fileName==null){
-            throw new RuntimeException(customMessageSource.get("file.not.found"));
-        }
+//        String fileName = documentRepo.findFileName(documentId);
+//        if (fileName==null){
+//            throw new RuntimeException(customMessageSource.get("file.not.found"));
+//        }
         File file=new File(documentPath);
         Path path=file.toPath();
-        String extension=FilenameUtils.getExtension(fileName);
+        //String extension=FilenameUtils.getExtension(fileName);
         if (file.exists()){
             String mimeType = Files.probeContentType(path);
             if (mimeType == null) {
                 mimeType = "application/octet-stream";
             }
             response.setContentType(mimeType);
-            if (extension.equals("docx") || extension.equals("doc") || extension.equals("pdf") ) {
-                response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
-            }
+//            if (extension.equals("docx") || extension.equals("doc") || extension.equals("pdf") ) {
+//                response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+//            }
             switch (action) {
                 case "view":
                     return EncodeFileToBase64.encodeFileToBase64Binary(file);
-                case "download":
-                    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fileName + "\"");
-                    break;
+//                case "download":
+//                    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fileName + "\"");
+//                    break;
             }
             response.setContentLength((int) file.length());
             InputStream inputStream = new BufferedInputStream(new FileInputStream(file));

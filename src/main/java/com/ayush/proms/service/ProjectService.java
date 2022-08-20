@@ -33,4 +33,6 @@ public interface ProjectService {
 
     List<ProjectPOJO> getLatestProjects();
 
+    void deleteProject(Long projectId);
+
 }

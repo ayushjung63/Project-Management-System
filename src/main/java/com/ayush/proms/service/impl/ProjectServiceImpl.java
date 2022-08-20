@@ -263,4 +263,12 @@ public class ProjectServiceImpl  implements ProjectService {
                 .projectType(ProjectType.valueOf(projectPOJO.getProjectType()))
                 .build();
     }
+
+    @Override
+    public void deleteProject(Long projectId) {
+        Project project = projectRepo.findById(projectId).orElseThrow(
+                () -> new RuntimeException("Project not found")
+        );
+        projectRepo.deleteById(projectId);
+    }
 }

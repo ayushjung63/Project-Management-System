@@ -4,6 +4,8 @@ import com.ayush.proms.enums.ProjectType;
 import com.ayush.proms.enums.ProjectStatus;
 import com.ayush.proms.utils.AuditAbstract;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.*;
@@ -27,7 +29,8 @@ public class Project extends AuditAbstract {
     private String description;
 
     @ElementCollection
-    @JoinTable(name = "project_tool_id")
+    @CollectionTable(name = "project_tools",joinColumns = @JoinColumn(name = "project_id"))
+    @Column(name = "tools")
     private List<String> projectTools;
 
     private String shortName;

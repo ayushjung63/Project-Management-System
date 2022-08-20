@@ -29,7 +29,7 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("/import-users")
-    public ResponseEntity importUsers(@RequestBody MultipartFile file) throws IOException {
+    public ResponseEntity importUsers(@ModelAttribute MultipartFile file) throws IOException {
         Integer data = userService.importUser(file);
         if (data>=1){
             return new ResponseEntity(successResponse("Users imported Successfully",data), HttpStatus.OK);
