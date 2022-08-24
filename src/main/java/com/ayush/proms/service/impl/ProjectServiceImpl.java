@@ -1,5 +1,6 @@
 package com.ayush.proms.service.impl;
 
+import com.ayush.proms.enums.DocumentType;
 import com.ayush.proms.enums.ProjectStatus;
 import com.ayush.proms.enums.ProjectType;
 import com.ayush.proms.enums.Role;
@@ -169,11 +170,12 @@ public class ProjectServiceImpl  implements ProjectService {
     public Long uploadImage(DocumentPOJO documentPOJO, Long projectId) throws IOException {
         Optional<Project> projectOptional = projectRepo.findById(projectId);
         if (projectOptional.isPresent()){
-            documentPOJO.setType("Image");
-
+           documentPOJO.setDocumentType(DocumentType.IMAGE);
+            Long upload = documentService.upload(documentPOJO);
             Project project = projectOptional.get();
-            projectRepo.save(project);
-            return project.getId();
+
+                return project.getId();
+
         }else{
             throw new RuntimeException(customMessageSource.get("not.found",customMessageSource.get("project")));
         }
@@ -243,8 +245,8 @@ public class ProjectServiceImpl  implements ProjectService {
                 )
                 .supervisor(project.getSupervisor()==null ? "Not Assigned" : project.getSupervisor().getFullName())
                 .projectStatus(project.getProjectStatus())
-                .start_date(project.getStart_date())
-                .end_date(project.getEnd_date())
+                .startDate(project.getStart_date())
+                .endDate(project.getEnd_date())
                 .imageId(project.getImage()==null ? null : project.getImage().getId())
                 .documentStatus(project.getDocumentStatus())
                 .projectType(String.valueOf(project.getProjectType()))
@@ -258,8 +260,8 @@ public class ProjectServiceImpl  implements ProjectService {
                 .description(projectPOJO.getDescription()==null ? null :projectPOJO.getDescription())
                 .shortName(projectPOJO.getShortName())
                 .projectTools(projectPOJO.getProjectTools())
-                .start_date(projectPOJO.getStart_date())
-                .end_date(projectPOJO.getEnd_date())
+                .start_date(projectPOJO.getStartDate())
+                .end_date(projectPOJO.getEndDate())
                 .projectType(ProjectType.valueOf(projectPOJO.getProjectType()))
                 .build();
     }

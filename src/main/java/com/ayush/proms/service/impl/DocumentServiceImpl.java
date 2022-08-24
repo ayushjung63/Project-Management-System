@@ -53,10 +53,12 @@ public class DocumentServiceImpl implements DocumentService {
     public Long upload(DocumentPOJO documentPOJO) throws IOException {
         String fileUrl = fileStorageService.store(documentPOJO.getMultipartFile());
         String extension = FilenameUtils.getExtension(documentPOJO.getMultipartFile().getOriginalFilename());
-        if ( ! "pdf".equals(extension)) {
+        if ( !DocumentType.IMAGE.equals(documentPOJO.getDocumentType()) && ! "pdf".equals(extension)) {
                 throw new RuntimeException("Please upload pdf file only.");
         }
-        validDocumentFlow(documentPOJO.getProjectId(),documentPOJO.getDocumentType());
+        if (!DocumentType.IMAGE.equals(documentPOJO.getDocumentType())) {
+            validDocumentFlow(documentPOJO);
+        }
 
         Document document = toEntity(documentPOJO);
         document.setUrl(fileUrl);
@@ -67,18 +69,26 @@ public class DocumentServiceImpl implements DocumentService {
         if (projectOptional.isPresent()) {
             Project project = projectOptional.get();
             if (DocumentType.IMAGE.equals(documentPOJO.getDocumentType())) {
+                if (project.getImage() != null){
+                    documentRepo.deleteById(project.getImage().getId());
+                }
                 Long saveDocument = saveDocument(document);
                 project.setImage(documentRepo.getById(saveDocument));
                 projectRepo.save(project);
                 return saveDocument;
             } else if (ProjectStatus.ACCEPTED == project.getProjectStatus()) {
-                document.setDocumentStatus(DocumentStatus.SUBMITTED);
                 document.setProject(project);
+                if (document.getId() != null){
+                    Document save = documentRepo.save(document);
+                    return save.getId();
+                }else {
+                    document.setDocumentStatus(DocumentStatus.SUBMITTED);
 
-                project.setDocumentStatus(documentPOJO.getDocumentType());
-                projectRepo.save(project);
+                    project.setDocumentStatus(documentPOJO.getDocumentType());
+                    projectRepo.save(project);
 
-                return saveDocument(document);
+                    return saveDocument(document);
+                }
             } else {
                 throw new ProjectStatusNotValidException(customMessageSource.get("not.accepted", customMessageSource.get("project")));
             }
@@ -88,31 +98,41 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
 
-    public void validDocumentFlow(Long projectId, DocumentType documentType){
-        List<Document> uploadedDocs =new ArrayList<>();
-        DocumentType checkAgainst;
-        if (DocumentType.MID_EVALUATION.equals(documentType)) {
-            checkAgainst=DocumentType.PROPOSAL;
-        }
-        else if (DocumentType.FINAL_DEFENSE.equals(documentType)){
-            checkAgainst=DocumentType.MID_EVALUATION;
-        }else{
-           return;
-        }
-        uploadedDocs=documentRepo.findDocumentByProjectIdAndStatus(projectId,checkAgainst.name());
-        if (uploadedDocs.size() == 0) {
-            throw new RuntimeException("Upload " + checkAgainst + " document first");
+    public void validDocumentFlow(DocumentPOJO documentPOJO){
+        DocumentType documentType = documentPOJO.getDocumentType();
+        Long projectId = documentPOJO.getProjectId();
+        if (documentPOJO.getId() == null) {
+            Document uploadedDocument = documentRepo.findDocumentByProjectIdAndStatus(projectId
+                    , documentType.name());
+            if (uploadedDocument != null) {
+                throw new RuntimeException(documentType + " document is already uploaded.");
+            }
+            DocumentType checkAgainst;
+            if (DocumentType.MID_EVALUATION.equals(documentType)) {
+                checkAgainst = DocumentType.PROPOSAL;
+            } else if (DocumentType.FINAL_DEFENSE.equals(documentType)) {
+                checkAgainst = DocumentType.MID_EVALUATION;
+            } else {
+                return;
+            }
+            Document document = documentRepo.findDocumentByProjectIdAndStatus(projectId, checkAgainst.name());
+            if (document == null) {
+                throw new RuntimeException("Upload " + checkAgainst + " document first");
+            }
         }
     }
 
+
+
     @Override
-    public String getDocument(Long documentId, String action, HttpServletResponse response) throws IOException {
-        String documentPath = documentRepo.findDocumentPath(documentId);
-//        String fileName = documentRepo.findFileName(documentId);
+    public DocumentPOJO getDocument(Long documentId, String action, HttpServletResponse response) throws IOException {
+        //String documentPath = documentRepo.findDocumentPath(documentId);
+        Document document = documentRepo.findById(documentId).orElseThrow(() -> new RuntimeException("Document not found."));
+        //        String fileName = documentRepo.findFileName(documentId);
 //        if (fileName==null){
 //            throw new RuntimeException(customMessageSource.get("file.not.found"));
 //        }
-        File file=new File(documentPath);
+        File file=new File(document.getUrl());
         Path path=file.toPath();
         //String extension=FilenameUtils.getExtension(fileName);
         if (file.exists()){
@@ -126,7 +146,12 @@ public class DocumentServiceImpl implements DocumentService {
 //            }
             switch (action) {
                 case "view":
-                    return EncodeFileToBase64.encodeFileToBase64Binary(file);
+                    return DocumentPOJO.builder()
+                            .projectId(document.getProject()==null ? null : document.getProject().getId())
+                            .encodedFile(EncodeFileToBase64.encodeFileToBase64Binary(file))
+                            .id(document.getId())
+                            .documentType(document.getDocumentType())
+                            .build();
 //                case "download":
 //                    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + fileName + "\"");
 //                    break;

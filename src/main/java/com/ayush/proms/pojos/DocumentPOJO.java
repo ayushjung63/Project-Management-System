@@ -21,4 +21,6 @@ public class DocumentPOJO {
     private Long userId;
     private Long projectId;
     private String type;
+
+    private String encodedFile;
 }

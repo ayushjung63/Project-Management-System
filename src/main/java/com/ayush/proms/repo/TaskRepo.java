@@ -25,4 +25,17 @@ public interface TaskRepo extends JpaRepository<Task,Long> {
     @Modifying
     @Query(nativeQuery=true,value="update task t set status=?2 where t.id=?1")
     void updateStatus(Long taskId, String status);
+
+    @Query(
+            nativeQuery=true,
+            value="select count(*) as completedTask from task t where t.project_id=?1 and t.status = 'COMPLETED'"
+    )
+    double findCompletedTaskByProjectId(Long projectId);
+
+
+    @Query(
+            nativeQuery=true,
+            value="select count(*)  from task t where t.project_id=?1"
+    )
+    double findTotalTaskByProjectId(Long projectId);
 }

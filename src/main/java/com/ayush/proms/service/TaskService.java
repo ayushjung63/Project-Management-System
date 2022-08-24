@@ -13,4 +13,6 @@ public interface TaskService {
     List<TaskPojo> getTaskListByProjectIdAndStatus(Long projectId, Status status);
 
     void changeTaskStatus(TaskPojo taskPojo);
+
+    int getTaskStatus(Long projectId);
 }

@@ -28,7 +28,7 @@ public class EmailSenderImpl implements EmailSender {
 
         message.setFrom("promis.activation@gmail.com");
         message.setTo(email.getTo());
-        message.setSubject("Login Credential");
+        message.setSubject(email.getSubject());
         message.setText(email.getBody());
 
         javaMailSender.send(message);

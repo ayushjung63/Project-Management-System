@@ -5,7 +5,7 @@ import com.ayush.proms.enums.DocumentType;
 import com.ayush.proms.enums.MIMEType;
 import com.ayush.proms.utils.AuditAbstract;
 import lombok.*;
-import org.hibernate.annotations.Cascade;
+import java.util.*;
 
 import javax.persistence.*;
 
@@ -40,6 +40,9 @@ public class Document extends AuditAbstract {
 
     @Enumerated(value = EnumType.STRING)
     private DocumentStatus documentStatus;
+
+    @OneToMany(cascade = CascadeType.REMOVE,fetch = FetchType.LAZY,mappedBy = "document")
+    private List<SupervisorComment> supervisorComments;
 
     public Document(Long id){
         this.id=id;

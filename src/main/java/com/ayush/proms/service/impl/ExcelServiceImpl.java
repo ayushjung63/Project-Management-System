@@ -30,7 +30,7 @@ public class ExcelServiceImpl implements ExcelService {
             int rowNumber = 0;
             while (rows.hasNext()) {
                 Row currentRow = (Row) rows.next();
-                if (!isRowEmpty(currentRow)) {
+
 
                     /*Skips Heading*/
                     if (rowNumber == 0) {
@@ -83,7 +83,7 @@ public class ExcelServiceImpl implements ExcelService {
                         columnIndex++;
                     }
                     userList.add(user);
-                }
+
             }
             workbook.close();
             return userList;
@@ -94,7 +94,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     public String nullCheck(String cellValue,String cell){
-        if (cellValue == null || cell.isEmpty() ){
+        if (cellValue == null || cellValue=="" ){
             throw new RuntimeException("No data found for "+ cell);
         }
         else{

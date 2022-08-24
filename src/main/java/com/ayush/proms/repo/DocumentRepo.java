@@ -19,5 +19,8 @@ public interface DocumentRepo extends JpaRepository<Document,Long> {
     List<Document> findDocumentByProjectId(Long projectId);
 
     @Query(nativeQuery=true,value="select * from document where project_id=?1 and document_type=?2")
-    List<Document> findDocumentByProjectIdAndStatus(Long projectId, String documentType);
+    Document findDocumentByProjectIdAndStatus(Long projectId, String documentType);
+
+    @Query(nativeQuery=true,value="select * from document where project_id=?1 and document_type=?2")
+    void findByProjectIdAndDocumentType(Long projectId, String name);
 }

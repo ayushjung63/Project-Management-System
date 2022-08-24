@@ -46,4 +46,10 @@ public class TaskController extends BaseController {
         taskService.changeTaskStatus(taskPojo);
         return ResponseEntity.ok(successResponse(customMessageSource.get("status.changed",customMessageSource.get("task")),null));
     }
+
+    @GetMapping("/task-status/project-id/{projectId}")
+    public ResponseEntity taskStatus(@PathVariable("projectId") Long projectId){
+        int data = taskService.getTaskStatus(projectId);
+        return ResponseEntity.ok(successResponse(customMessageSource.get("status.changed",customMessageSource.get("task")),data));
+    }
 }

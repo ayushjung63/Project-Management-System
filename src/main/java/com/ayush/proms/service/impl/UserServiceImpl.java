@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
         User entity = toEntity(userPOJO);
         String randomPassword = PasswordGenerator.generateRandomPassword();
         entity.setPassword(passwordEncoder.encode(randomPassword));
-        User user = userRepo.save(entity);
+        User user = userRepo.saveAndFlush(entity);
         if (user!=null){
             userPOJO.setEmail(user.getEmail());
             userPOJO.setPassword(randomPassword);
@@ -229,6 +229,7 @@ public class UserServiceImpl implements UserService {
                         "Note: Please do not share your login credential with anyone. Dont forgot to change the default password after you login.\n"+
                         "Thank You!!"
                 )
+                .subject("Login Credentials")
                 .build();
         emailSender.sendLoginCredential(email);
     }
@@ -246,6 +247,7 @@ public class UserServiceImpl implements UserService {
                             "Note: Please do not share your login credential with anyone. Dont forgot to change the default password after you login.\n" +
                             "Thank You!!"
                     )
+                    .subject("Project Assigned")
                     .build();
             emailSender.sendLoginCredential(email);
         }

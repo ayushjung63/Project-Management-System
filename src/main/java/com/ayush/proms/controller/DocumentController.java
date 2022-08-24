@@ -41,8 +41,8 @@ public class DocumentController extends BaseController {
     @GetMapping("/view-or-download/view/{documentId}")
     public ResponseEntity getDocument(@PathVariable("documentId") Long documentId, HttpServletResponse httpServletResponse) throws IOException {
         String action="view";
-        String jsonData = documentService.getDocument(documentId, action, httpServletResponse);
-        return ResponseEntity.ok(successResponse(customMessageSource.get("document.fetch"),jsonData));
+        DocumentPOJO document = documentService.getDocument(documentId, action, httpServletResponse);
+        return ResponseEntity.ok(successResponse(customMessageSource.get("document.fetch"),document));
     }
 
     @GetMapping("/list/project-id/{projectId}")

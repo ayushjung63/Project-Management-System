@@ -11,7 +11,7 @@ import java.io.IOException;
 public interface DocumentService {
     Long upload(DocumentPOJO documentPOJO) throws IOException;
 
-    String getDocument(Long documentId, String action, HttpServletResponse httpServletResponse) throws IOException;
+    DocumentPOJO getDocument(Long documentId, String action, HttpServletResponse httpServletResponse) throws IOException;
 
     Long saveDocument(Document document);
 

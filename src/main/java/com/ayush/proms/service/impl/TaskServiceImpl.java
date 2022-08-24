@@ -89,4 +89,17 @@ public class TaskServiceImpl implements TaskService {
                 .addedBy(task.getUser().getFullName())
                 .build();
     }
+
+    @Override
+    public int getTaskStatus(Long projectId) {
+        double completedTask = taskRepo.findCompletedTaskByProjectId(projectId);
+        double totalTask = taskRepo.findTotalTaskByProjectId(projectId);
+        if (totalTask ==0 || completedTask==0){
+            return 0;
+        }
+
+        double v =( completedTask / totalTask ) * 100;
+        int data = (int) v;
+        return data;
+    }
 }

@@ -20,8 +20,8 @@ public class ProjectPOJO {
     private String title;
     private String description;
     private String shortName;
-    private Date start_date;
-    private Date end_date;
+    private Date startDate;
+    private Date endDate;
     private List<String> projectTools=new ArrayList<>();
     private List<MinimalDetail> studentList=new ArrayList<>();
     private String supervisor;
