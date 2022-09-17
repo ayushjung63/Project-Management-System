@@ -3,6 +3,8 @@ package com.ayush.proms.service;
 import com.ayush.proms.model.Document;
 import com.ayush.proms.pojos.DocumentMinimalDetail;
 import com.ayush.proms.pojos.DocumentPOJO;
+import com.ayush.proms.pojos.ImagePojo;
+
 import java.util.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -16,4 +18,10 @@ public interface DocumentService {
     Long saveDocument(Document document);
 
     List<DocumentMinimalDetail> getDocumentByProjectId(Long projectId);
+
+    Long uploadImages(DocumentPOJO documentPOJO);
+
+    List<DocumentPOJO> getImages(Long projectId) throws IOException;
+
+    void deleteImage(Long imageId);
 }

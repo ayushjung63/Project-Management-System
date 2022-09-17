@@ -4,5 +4,6 @@ public enum DocumentType {
     PROPOSAL,
     MID_EVALUATION,
     FINAL_DEFENSE,
-    IMAGE
+    IMAGE,
+    LOGO
 }

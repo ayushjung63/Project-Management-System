@@ -3,6 +3,7 @@ package com.ayush.proms.service.impl;
 import com.ayush.proms.model.Document;
 import com.ayush.proms.model.SupervisorComment;
 import com.ayush.proms.pojos.SupervisorCommentPOJO;
+import com.ayush.proms.pojos.SupervisorLogPojo;
 import com.ayush.proms.repo.SupervisorCommentRepo;
 import com.ayush.proms.service.SupervisorCommentService;
 import net.bytebuddy.implementation.bind.annotation.Super;
@@ -29,9 +30,9 @@ public class SupervisorCommentServiceImpl implements SupervisorCommentService {
     }
 
     @Override
-    public Long deleteComment(Long commentId) {
+    public void deleteComment(Long commentId) {
         supervisorCommentRepo.deleteById(commentId);
-        return 1L;
+
     }
 
     @Override
@@ -42,6 +43,11 @@ public class SupervisorCommentServiceImpl implements SupervisorCommentService {
             return commentPOJOS;
         }
         return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public List<SupervisorLogPojo> getSupervisorLog(Long projectId) {
+        return supervisorCommentRepo.findSupervisorLogByProjectId(projectId);
     }
 
     SupervisorComment toEntity(SupervisorCommentPOJO pojo){

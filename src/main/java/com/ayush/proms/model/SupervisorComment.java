@@ -1,5 +1,6 @@
 package com.ayush.proms.model;
 
+import com.ayush.proms.utils.AuditAbstract;
 import lombok.*;
 
 import javax.persistence.*;
@@ -11,7 +12,7 @@ import javax.persistence.*;
 @Builder
 @Getter
 @Setter
-public class SupervisorComment {
+public class SupervisorComment extends AuditAbstract {
 
     @Id
     @SequenceGenerator(name = "comment_sequnce",sequenceName = "comment_sequence",allocationSize = 1)

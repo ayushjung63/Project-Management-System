@@ -30,11 +30,11 @@ public class Document extends AuditAbstract {
     @Enumerated(value = EnumType.STRING)
     private MIMEType mimeType;
 
-    @OneToOne(fetch = FetchType.LAZY,cascade = CascadeType.MERGE)
+    @OneToOne(fetch = FetchType.LAZY,cascade = CascadeType.DETACH)
     @JoinColumn(name = "user_id",foreignKey = @ForeignKey(name = "FK_user"))
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.DETACH)
     @JoinColumn(name = "project_id",foreignKey = @ForeignKey(name = "FK_project"))
     private Project project;
 

@@ -10,6 +10,7 @@ import com.ayush.proms.model.Project;
 import com.ayush.proms.model.User;
 import com.ayush.proms.pojos.DocumentMinimalDetail;
 import com.ayush.proms.pojos.DocumentPOJO;
+import com.ayush.proms.pojos.ImagePojo;
 import com.ayush.proms.repo.DocumentRepo;
 import com.ayush.proms.repo.ProjectRepo;
 import com.ayush.proms.service.DocumentService;
@@ -22,6 +23,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -53,10 +55,18 @@ public class DocumentServiceImpl implements DocumentService {
     public Long upload(DocumentPOJO documentPOJO) throws IOException {
         String fileUrl = fileStorageService.store(documentPOJO.getMultipartFile());
         String extension = FilenameUtils.getExtension(documentPOJO.getMultipartFile().getOriginalFilename());
-        if ( !DocumentType.IMAGE.equals(documentPOJO.getDocumentType()) && ! "pdf".equals(extension)) {
+        List<DocumentType> imageType=Arrays.asList(DocumentType.IMAGE,DocumentType.LOGO);
+        List<String> imageExtension=Arrays.asList("jpg","jpeg","png","svg");
+        if (imageType.contains(documentPOJO.getDocumentType()) && !imageExtension.contains(extension)){
+            throw new RuntimeException("Please upload JPG, JPEG or PNG Image only.");
+        }
+
+        if ( ! imageType.contains(documentPOJO.getDocumentType())
+         && ! "pdf".equals(extension)) {
                 throw new RuntimeException("Please upload pdf file only.");
         }
-        if (!DocumentType.IMAGE.equals(documentPOJO.getDocumentType())) {
+        if (!DocumentType.IMAGE.equals(documentPOJO.getDocumentType())
+                || !DocumentType.LOGO.equals(documentPOJO.getDocumentType())) {
             validDocumentFlow(documentPOJO);
         }
 
@@ -68,13 +78,17 @@ public class DocumentServiceImpl implements DocumentService {
         Optional<Project> projectOptional = projectRepo.findById(documentPOJO.getProjectId());
         if (projectOptional.isPresent()) {
             Project project = projectOptional.get();
-            if (DocumentType.IMAGE.equals(documentPOJO.getDocumentType())) {
+            if (DocumentType.LOGO.equals(documentPOJO.getDocumentType())) {
                 if (project.getImage() != null){
                     documentRepo.deleteById(project.getImage().getId());
                 }
                 Long saveDocument = saveDocument(document);
                 project.setImage(documentRepo.getById(saveDocument));
                 projectRepo.save(project);
+                return saveDocument;
+            }else if (DocumentType.IMAGE.equals(documentPOJO.getDocumentType())) {
+                document.setProject(project);
+                Long saveDocument = saveDocument(document);
                 return saveDocument;
             } else if (ProjectStatus.ACCEPTED == project.getProjectStatus()) {
                 document.setProject(project);
@@ -83,10 +97,8 @@ public class DocumentServiceImpl implements DocumentService {
                     return save.getId();
                 }else {
                     document.setDocumentStatus(DocumentStatus.SUBMITTED);
-
                     project.setDocumentStatus(documentPOJO.getDocumentType());
                     projectRepo.save(project);
-
                     return saveDocument(document);
                 }
             } else {
@@ -101,7 +113,7 @@ public class DocumentServiceImpl implements DocumentService {
     public void validDocumentFlow(DocumentPOJO documentPOJO){
         DocumentType documentType = documentPOJO.getDocumentType();
         Long projectId = documentPOJO.getProjectId();
-        if (documentPOJO.getId() == null) {
+        if (!documentPOJO.getDocumentType().equals(DocumentType.IMAGE) && documentPOJO.getId() == null) {
             Document uploadedDocument = documentRepo.findDocumentByProjectIdAndStatus(projectId
                     , documentType.name());
             if (uploadedDocument != null) {
@@ -140,7 +152,7 @@ public class DocumentServiceImpl implements DocumentService {
             if (mimeType == null) {
                 mimeType = "application/octet-stream";
             }
-            response.setContentType(mimeType);
+
 //            if (extension.equals("docx") || extension.equals("doc") || extension.equals("pdf") ) {
 //                response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
 //            }
@@ -209,9 +221,45 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public List<DocumentMinimalDetail> getDocumentByProjectId(Long projectId) {
-        List<Document> documentByProjectId = documentRepo.findDocumentByProjectId(projectId);
+        List<String> documentTypes = Arrays.asList(DocumentType.PROPOSAL.name(), DocumentType.MID_EVALUATION.name(), DocumentType.FINAL_DEFENSE.name());
+        List<Document> documentByProjectId = documentRepo.findDocumentByProjectId(projectId,documentTypes);
         return documentByProjectId.stream().
                 map(x->new DocumentMinimalDetail(x.getId(),x.getDocumentType())).
                 collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public Long uploadImages(DocumentPOJO documentPOJO) {
+        documentPOJO.getImages().forEach(x->{
+            try {
+                upload(
+                        DocumentPOJO.builder()
+                                .multipartFile(x)
+                                .projectId(documentPOJO.getProjectId())
+                                .documentType(DocumentType.IMAGE)
+                                .build()
+                );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        return 1L;
+    }
+
+    @Override
+    public List<DocumentPOJO> getImages(Long projectId) throws IOException {
+        List<DocumentPOJO> imageList=new ArrayList<>();
+        List<ImagePojo> imagesByProjectId = documentRepo.findImagesByProjectId(projectId);
+        for (ImagePojo imagePojo: imagesByProjectId){
+            DocumentPOJO documentPOJO = getDocument(imagePojo.getImageId(), "view", null);
+            imageList.add(documentPOJO);
+        }
+        return imageList;
+    }
+
+    @Override
+    public void deleteImage(Long imageId) {
+        documentRepo.deleteById(imageId);
     }
 }

@@ -8,4 +8,5 @@ import lombok.Setter;
 public class PasswordChangePojo {
     private String currentPassword;
     private String newPassword;
+    private Long userId;
 }

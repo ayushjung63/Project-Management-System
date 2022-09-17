@@ -170,10 +170,9 @@ public class ProjectServiceImpl  implements ProjectService {
     public Long uploadImage(DocumentPOJO documentPOJO, Long projectId) throws IOException {
         Optional<Project> projectOptional = projectRepo.findById(projectId);
         if (projectOptional.isPresent()){
-           documentPOJO.setDocumentType(DocumentType.IMAGE);
+           documentPOJO.setDocumentType(documentPOJO.getDocumentType()==null? DocumentType.LOGO: documentPOJO.getDocumentType());
             Long upload = documentService.upload(documentPOJO);
             Project project = projectOptional.get();
-
                 return project.getId();
 
         }else{

@@ -31,4 +31,17 @@ public class SupervisorCommentController extends BaseController {
         return ResponseEntity.ok(successResponse(customMessageSource.get("crud.get",customMessageSource.get("comment"))
                 ,comment));
     }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity deleteComment(@PathVariable("id") Long id) throws IOException {
+        supervisorCommentService.deleteComment(id);
+        return ResponseEntity.ok(successResponse(customMessageSource.get("crud.delete",customMessageSource.get("comment"))
+                ,null));
+    }
+
+    @GetMapping("/log/project-id/{projectId}")
+    public ResponseEntity getSupervisorLog(@PathVariable("projectId") Long projectId){
+        return ResponseEntity.ok(successResponse(customMessageSource.get("crud.get_all",customMessageSource.get("supervisor.log"))
+                , supervisorCommentService.getSupervisorLog(projectId)));
+    }
 }

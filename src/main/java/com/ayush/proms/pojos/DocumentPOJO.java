@@ -1,11 +1,11 @@
 package com.ayush.proms.pojos;
 
 import com.ayush.proms.enums.DocumentType;
-import com.ayush.proms.model.User;
+import java.util.*;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.*;
+
 
 @Getter
 @Setter
@@ -18,6 +18,7 @@ public class DocumentPOJO {
     private String url;
     private DocumentType documentType;
     private MultipartFile multipartFile;
+    private List<MultipartFile> images;
     private Long userId;
     private Long projectId;
     private String type;

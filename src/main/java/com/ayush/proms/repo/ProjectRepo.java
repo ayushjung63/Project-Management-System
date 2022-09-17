@@ -30,6 +30,6 @@ public interface ProjectRepo extends JpaRepository<Project,Long> {
     @Query(nativeQuery=true,value="select count(p.id) from project p")
     Integer findTotalProjectCount();
 
-    @Query(nativeQuery=true,value="select * from project order by id desc limit 6;")
+    @Query(nativeQuery=true,value="select * from project order by id desc limit 7;")
     List<Project> findLatestProjects();
 }

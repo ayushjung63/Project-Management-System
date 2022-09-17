@@ -1,11 +1,15 @@
 package com.ayush.proms.service;
 
 import com.ayush.proms.pojos.SupervisorCommentPOJO;
+import com.ayush.proms.pojos.SupervisorLogPojo;
+
 import java.util.*;
 
 public interface SupervisorCommentService {
     Long createComment(SupervisorCommentPOJO commentPOJO);
-    Long deleteComment(Long commentId);
+    void deleteComment(Long commentId);
 
     List<SupervisorCommentPOJO>  getCommentByDocumentId(Long documentId);
+
+    List<SupervisorLogPojo> getSupervisorLog(Long projectId);
 }

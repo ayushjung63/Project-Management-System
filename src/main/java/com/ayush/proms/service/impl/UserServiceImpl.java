@@ -1,6 +1,7 @@
 package com.ayush.proms.service.impl;
 
 import com.ayush.proms.enums.Faculty;
+import com.ayush.proms.enums.Role;
 import com.ayush.proms.enums.Semester;
 import com.ayush.proms.mail.Email;
 import com.ayush.proms.mail.EmailSender;
@@ -51,6 +52,7 @@ public class UserServiceImpl implements UserService {
     public Long createUser(UserPOJO userPOJO) {
         User entity = toEntity(userPOJO);
         String randomPassword = PasswordGenerator.generateRandomPassword();
+        entity.setRole(Role.STUDENT);
         entity.setPassword(passwordEncoder.encode(randomPassword));
         User user = userRepo.saveAndFlush(entity);
         if (user!=null){
@@ -76,6 +78,7 @@ public class UserServiceImpl implements UserService {
                     String randomPassword = PasswordGenerator.generateRandomPassword();
                     UserPOJO userPOJO = UserPOJO.builder().email(user.getEmail()).password(randomPassword).build();
                     pojoList.add(userPOJO);
+                    user.setRole(Role.STUDENT);
                     user.setPassword(passwordEncoder.encode(randomPassword));
                 }
                 List<User> users = userRepo.saveAll(userList);
@@ -208,7 +211,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void changePassword(PasswordChangePojo passwordChangePojo) {
         User currentUser = authenticationUtil.getCurrentUser();
-        if (passwordEncoder.matches(passwordChangePojo.getCurrentPassword(),currentUser.getPassword())){
+        if (Role.ADMIN.equals(currentUser.getRole())){
+            User userRepoById = userRepo.getById(passwordChangePojo.getUserId());
+            userRepoById.setPassword(passwordEncoder.encode(passwordChangePojo.getNewPassword()));
+            userRepoById.setPasswordChanged(true);
+            userRepo.save(userRepoById);
+        }
+        else if (passwordEncoder.matches(passwordChangePojo.getCurrentPassword(),currentUser.getPassword())){
             currentUser.setPassword(passwordEncoder.encode(passwordChangePojo.getNewPassword()));
             currentUser.setPasswordChanged(true);
             userRepo.save(currentUser);

@@ -51,4 +51,31 @@ public class DocumentController extends BaseController {
         return ResponseEntity.ok(successResponse(customMessageSource.get("document.fetch"),documentByProjectId));
     }
 
+    @PostMapping("/upload-images")
+    public ResponseEntity uploadMultipleImage(@ModelAttribute  DocumentPOJO documentPOJO){
+        Long data = documentService.uploadImages(documentPOJO);
+        if (data>=1){
+            return new ResponseEntity(successResponse(customMessageSource.get("crud.save",customMessageSource.get("document")),data), HttpStatus.OK);
+        }else {
+            return new ResponseEntity(errorResponse(customMessageSource.get("crud.failed",customMessageSource.get("document")),data),HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("/images/project-id/{projectId}")
+    public ResponseEntity getImages(@PathVariable("projectId") Long projectId) throws IOException {
+        return ResponseEntity.ok(successResponse(customMessageSource.get("document.fetch"),
+                documentService.getImages(projectId)
+                ));
+    }
+
+    @DeleteMapping("/images/delete/{imageId}")
+    public ResponseEntity deleteImage(@PathVariable("imageId") Long imageId) throws IOException {
+        documentService.deleteImage(imageId);
+        return ResponseEntity.ok(successResponse(customMessageSource.get("image.delete"),
+               null
+        ));
+    }
+
+
+
 }
